@@ -4,21 +4,25 @@ This library has been created to generate global raster maps of OpenStreetMap (O
 It is designed to take a heavily compressed OSM planet dump file, in protocol buffer format (pbf) and extract geographical entities and raster maps.
 The OSM planet dump file can be found on various mirrors. See: http://wiki.openstreetmap.org/wiki/Planet.osm
 
+Why Hadoop?
+===========
 The OSM data model consists of nodes, ways and relations.  
 Geographic information (x,y coordinates) is stored within nodes, and their spatial context is described through an ordered list of node ids (known as way nodes) held within ways.
 Two ways forming part of a road network may share a common node - i.e. transport infrastructure data are stored as a topological network.
 Attributes of both nodes and ways are held in a set of key-value pairs.
 
 The upshot using of such a normalised data model is that to obtain geographic entities such as linestrings and polygons, 
-the nodes and ways must be joined in the order specified. At the global scale this becomes be a computationally intensive task because either a complete list of ~3 billion node locations must be held, indexed by node-id, or as is the case here all the nodes must be "mapped" and joined to the way-nodes - see step 1.
+the nodes and ways must be joined in the order specified. At the global scale this becomes be a computationally intensive task because either a complete list of ~3 billion node locations must be held, indexed by node-id, or as is the case here all the nodes must be "mapped" and joined to the way-nodes - see step 1.  
+Performing this processing on a single machine can take several weeks, as is the case of populating a spatial database with the OSM data using the Osmosis toolchain.  On a nine-node cluster with 72 cores the data parsing, joining, building of spatial entities and the rasterization can be completed in less than half an hour.
 
 It may be worth noting that relations store the relationship between ways, for example describing the constituent parts of a multi-polygon, however these are not relevant to the tasks performed here.
 
-The environment requirements are Hadoop (map-reduce v2) and Spark version > 1.2.  All other dependencies will be resolved by Apache Maven at build time.
-There is a strong dependence on Osmosis (http://wiki.openstreetmap.org/wiki/Osmosis) which performs the parsing of the protocol buffer encoded OSM entities.
 
 Building
 ========
+Apache Maven is used to build the project. The runtime environment requirements are Hadoop (map-reduce v2) and Spark version > 1.2. All other dependencies will be resolved by Maven at build time.
+There is a strong dependence on Osmosis (http://wiki.openstreetmap.org/wiki/Osmosis) which performs the parsing of the protocol buffer encoded OSM entities.
+
 The code is easiest to run on a Hadoop cluster as an "uber-jar".  This can be built with Maven:
 
 ```
