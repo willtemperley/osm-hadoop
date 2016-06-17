@@ -1,0 +1,9 @@
+/dependency-reduced-pom.xml
+/vietnam-latest.osm.pbf
+*.iml
+.idea/
+.classpath
+.project
+.settings/
+.oldgit/
+target/
