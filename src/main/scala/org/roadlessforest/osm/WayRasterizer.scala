@@ -35,8 +35,8 @@ object WayRasterizer extends Configured with Tool {
 
   override def run(args: Array[String]): Int = {
 
-    if (args.length != 2) {
-      println("Usage: WayRasterizer input-seqfile-path output-seqfile-path")
+    if (args.length != 3) {
+      println("Usage: WayRasterizer input-seqfile-path output-seqfile-path tag")
       return 1
     }
 
