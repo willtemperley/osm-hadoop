@@ -1,18 +1,12 @@
 package org.roadlessforest.osm
 
 import java.io._
-import java.util
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.{ArrayPrimitiveWritable, SequenceFile, Text}
-import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer
-import org.openstreetmap.osmosis.core.domain.v0_6.Entity
 import org.openstreetmap.osmosis.osmbinary.Fileformat
 import org.openstreetmap.osmosis.osmbinary.Fileformat.BlobHeader
-import org.openstreetmap.osmosis.pbf.PbfBlobDecoder2
-
-import scala.collection.JavaConversions._
 /**
   * Created by willtemperley@gmail.com on 31-May-16.
   */
@@ -66,14 +60,5 @@ object Preprocesser {
     rawBlob
   }
 
-  def readBlob(bytes: Array[Byte], osmDataType: String): Iterator[Entity] = {
-
-    val blobDecoder = new PbfBlobDecoder2(osmDataType, bytes)
-
-    val l: util.ArrayList[EntityContainer] = new util.ArrayList[EntityContainer]()
-    blobDecoder.runAndTrapExceptions(l)
-
-    l.toIterator.map(_.getEntity)//.foreach(f => println(f.getEntity.getType))
-  }
 
 }

@@ -81,7 +81,7 @@
 
         <dependency>
             <groupId>org.openstreetmap.osmosis</groupId>
-            <artifactId>osmosis-pbf</artifactId>
+            <artifactId>osmosis-pbf2</artifactId>
             <version>0.44.1</version>
         </dependency>
         <dependency>

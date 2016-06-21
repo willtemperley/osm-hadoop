@@ -11,12 +11,12 @@ import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer
 import org.openstreetmap.osmosis.core.domain.v0_6._
-import org.openstreetmap.osmosis.pbf.PbfBlobDecoder2
 import org.roadlessforest.osm.filter.EntityFilters
 
 import scala.collection.JavaConversions._
 import java.util
 
+import org.openstreetmap.osmosis.pbf2.v0_6.impl.{PbfBlobDecoder, PbfBlobDecoderListener}
 import org.roadlessforest.osm.writable._
 
 /**
@@ -68,7 +68,7 @@ object NodeJoiner extends Configured with Tool {
     * This mixing node and way ids is messy but efficient - otherwise a second reading  step would be required.
     *
     */
-  class OsmEntityMapper extends Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]  {
+  class OsmEntityMapper extends Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable] with DecodesOsm {
 
     val k = new LongWritable
     val v = new OsmEntityWritable
@@ -87,20 +87,9 @@ object NodeJoiner extends Configured with Tool {
       filterByTags = EntityFilters.filterByTags(tags) _
     }
 
-    def readBlob(osmBlock: ArrayPrimitiveWritable, osmDataType: String): Iterator[Entity] = {
-
-      val bytes = osmBlock.get().asInstanceOf[Array[Byte]]
-      val blobDecoder = new PbfBlobDecoder2(osmDataType, bytes)
-
-      val l: util.ArrayList[EntityContainer] = new util.ArrayList[EntityContainer]()
-      blobDecoder.runAndTrapExceptions(l)
-
-      l.toIterator.map(_.getEntity) //.foreach(f => println(f.getEntity.getType))
-    }
-
     override def map(key: Text, osmBlock: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
 
-      val entities = readBlob(osmBlock, key.toString)
+      val entities = readBlob(osmBlock.get().asInstanceOf[Array[Byte]], key.toString)
 
       for (value <- entities) {
 

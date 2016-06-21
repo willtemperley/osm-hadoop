@@ -1,20 +1,17 @@
 package org.roadlessforest.osm
 
 import java.io.File
-import java.util
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io._
-import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer
-import org.openstreetmap.osmosis.pbf.PbfBlobDecoder2
 
 /**
   * Created by willtemperley@gmail.com on 31-May-16.
   *
   */
 //TODO make into test
-object Readblobs {
+object Readblobs extends DecodesOsm {
 
   def main(args: Array[String]): Unit = {
 
@@ -28,12 +25,9 @@ object Readblobs {
 
     while (reader.next(key, v)) {
 
-      val blobDecoder = new PbfBlobDecoder2(key.toString, v.get().asInstanceOf[Array[Byte]])
+      val x = readBlob(v.get().asInstanceOf[Array[Byte]], key.toString)
 
-      val l: util.ArrayList[EntityContainer] = new util.ArrayList[EntityContainer]()
-      blobDecoder.runAndTrapExceptions(l)
-
-      println("n entities: " + l.size())
+      println("n entities: " + x.size)
     }
 
     reader.close()
