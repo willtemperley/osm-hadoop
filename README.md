@@ -6,14 +6,14 @@ The OSM planet dump file can be found on various mirrors. See: http://wiki.opens
 
 Why Hadoop?
 ===========
-The OSM data model consists of nodes, ways and relations.  
-Geographic information (x,y coordinates) is stored within nodes, and their spatial context is described through an ordered list of node ids (known as way nodes) held within ways.
-Two ways forming part of a road network may share a common node - i.e. transport infrastructure data are stored as a topological network.
-Attributes of both nodes and ways are held in a set of key-value pairs.
+The OSM data model consists of nodes, ways and relations.
+Geographic information (x,y coordinates) is only stored within nodes, and their relationship to one another is described through a list of node ids held within ways, known as way-nodes.
+Therefore to construct a way, the node corresponding to each way-node must be found. Two ways forming part of a road network may share a common node - i.e. transport infrastructure data are stored as a topological network.
+The attributes of both nodes and ways are held as a set of key-value pairs.
 
 The upshot using of such a normalised data model is that to obtain geographic entities such as linestrings and polygons, 
 the nodes and ways must be joined in the order specified. At the global scale this becomes be a computationally intensive task because either a complete list of ~3 billion node locations must be held, indexed by node-id, or as is the case here all the nodes must be "mapped" and joined to the way-nodes - see step 1.  
-Performing this processing on a single machine can take several weeks, as is the case of populating a spatial database with the OSM data using the Osmosis toolchain.  On a nine-node cluster with 72 cores the data parsing, joining, building of spatial entities and the rasterization can be completed in less than half an hour.
+Performing this processing on a single machine can take weeks, as is the case of populating a spatial database with the OSM data using the Osmosis toolchain.  On a nine-node cluster with 72 cores the data parsing, joining, building of spatial entities and the rasterization can be completed in less than half an hour.
 
 It may be worth noting that relations store the relationship between ways, for example describing the constituent parts of a multi-polygon, however these are not relevant to the tasks performed here.
 
@@ -93,7 +93,7 @@ The ways and referenced way-nodes resulting from step 1 are grouped by way-id. I
 For simplicity, the  is stored within the WayWritable as well-known-text, using the key "geometry".
 
 ```
-hadoop jar target/osm-hadoop-0.1.jar org.roadlessforest.osm.WayJoinMR  /your/home/osm/hwynodes /your/home/osm/highways
+hadoop jar target/osm-hadoop-0.1.jar org.roadlessforest.osm.WayBuilder  /your/home/osm/hwynodes /your/home/osm/highways
 ```
 
 Step 3 - Rasterize
@@ -103,7 +103,7 @@ Reduce-side, the pixel value of interest is filtered out, according to the prefe
 These are written as (x,y),z key-value pairs where x and y are the raster indices and z is the raster value.
 
 ```
-hadoop jar target/osm-hadoop-0.1.jar org.roadlessforest.osm.RasterizeMR /your/home/osm/highways /your/home/osm/xyz
+hadoop jar target/osm-hadoop-0.1.jar org.roadlessforest.osm.WayRasterizer /your/home/osm/highways /your/home/osm/xyz
 ```
 
 
