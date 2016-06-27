@@ -8,7 +8,6 @@
     <artifactId>osm-hadoop</artifactId>
     <version>0.1</version>
 
-
     <scm>
         <url>https://github.com/willtemperley/osm-hadoop</url>
         <connection>https://github.com/willtemperley/osm-hadoop</connection>

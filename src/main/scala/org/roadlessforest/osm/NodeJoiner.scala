@@ -9,22 +9,19 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
-import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer
 import org.openstreetmap.osmosis.core.domain.v0_6._
 import org.roadlessforest.osm.filter.EntityFilters
+import org.roadlessforest.osm.writable._
 
 import scala.collection.JavaConversions._
-import java.util
-
-import org.openstreetmap.osmosis.pbf2.v0_6.impl.{PbfBlobDecoder, PbfBlobDecoderListener}
-import org.roadlessforest.osm.writable._
 
 /**
   * Created by willtemperley@gmail.com on 07-Mar-16.
   */
 object NodeJoiner extends Configured with Tool {
 
-  val FILTER_KEY = "FILTER_KEY"
+  val LayerTagParameterName = "LayerTag" // The layer we're extracting
+  val WayTagsParameterName = "WayTags" // a list of tags to keep
 
   def main(args: Array[String]): Unit = {
 
@@ -34,13 +31,23 @@ object NodeJoiner extends Configured with Tool {
 
   override def run(args: Array[String]): Int = {
 
-    if (args.length != 3) {
-      println("Usage: NodeJoiner input-seqfile-path output-seqfile-path tag-key")
+    if (args.length < 3 || args.length > 4 ) {
+      println("Usage: NodeJoiner input-seqfile-path output-seqfile-path layer-tag [way-tag(s)]")
       return 1
     }
 
     val conf = getConf
-    conf.set(FILTER_KEY, args(2))
+    conf.set(LayerTagParameterName, args(2))
+
+    /*
+    The optional 4th param is a list of tags to keep. If not specified, we keep just the one that defines the layer.
+     */
+    if (args.length > 3) {
+      conf.set(WayTagsParameterName, args(3))
+    } else {
+      conf.set(LayerTagParameterName, args(2))
+    }
+
     val job: Job = Job.getInstance(conf)
 
     job.setJarByClass(this.getClass)
@@ -76,15 +83,24 @@ object NodeJoiner extends Configured with Tool {
     val wn = new WayNodeWritable
     val nn = new NodeWritable
 
-    var tags: Array[String] = _
-    var filterByTags: (Entity) => Boolean = _
+    var layerTag: String = _
+    var wayTags: Array[String] = _
+    var wayFilter: (Entity) => Boolean = _
 
+    /*
+     * Application parameters are retrieved in mappers through the configuration object.
+     */
     override def setup(context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
-      tags = context.getConfiguration.get(FILTER_KEY).split(",")
-      if (tags == null || tags.isEmpty) {
+
+      layerTag = context.getConfiguration.get(WayTagsParameterName)
+
+      wayTags = context.getConfiguration.get(LayerTagParameterName).split(",")
+
+      if (wayTags == null || wayTags.isEmpty) {
         throw new RuntimeException("No filter tag specified.")
       }
-      filterByTags = EntityFilters.filterByTags(tags) _
+
+      wayFilter = EntityFilters.filterByTags(layerTag) _
     }
 
     override def map(key: Text, osmBlock: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
@@ -96,7 +112,7 @@ object NodeJoiner extends Configured with Tool {
         /*
         Way nodes are emitted alongside their node ids.
          */
-        if (value.getType.equals(EntityType.Way) && filterByTags(value)) {
+        if (value.getType.equals(EntityType.Way) && wayFilter(value)) {
           val way = value.asInstanceOf[Way]
 
           way.getWayNodes.zipWithIndex.foreach(
@@ -113,8 +129,8 @@ object NodeJoiner extends Configured with Tool {
            */
           val wayWritable = new WayWritable() //purposefully recreated as it's dangerous to re-use a mapwritable
 
-          for (t: String <- tags) {
-            val theTag: Option[Tag] = value.getTags.find(_.getKey.equals(t))
+          for (t: String <- wayTags) {
+            val theTag: Option[Tag] = value.getTags.find(f => f.getKey.equals(t))
             if (theTag.isDefined) {
               wayWritable.put(t, theTag.get.getValue)
             }
