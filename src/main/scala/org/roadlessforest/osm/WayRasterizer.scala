@@ -136,6 +136,8 @@ object WayRasterizer extends Configured with Tool {
       //fixme hackery
       if (rasterValueKey.toString.equals("highway")) {
         pixVal.set(highwayMap(rasterValueString))
+      } else if (rasterValueKey.toString.equals("navigable")){
+
       } else {
         pixVal.set(1)
       }
@@ -187,8 +189,17 @@ object WayRasterizer extends Configured with Tool {
     override def reduce(key: CoordinateWritable, values: Iterable[IntWritable],
                         context: Reducer[CoordinateWritable, IntWritable, CoordinateWritable, IntWritable]#Context): Unit = {
 
-      val pixelValue = values.map(_.get()).map(classToPrecedenceMap).min
-      outVal.set(pixelValue)
+      //Need to find the pixel with the lowest value
+      val pixelValues = values.map(_.get())
+
+      //Join
+      val pixelsToPrecedence = pixelValues.zip(pixelValues.map(classToPrecedenceMap))
+
+//      val pixelValue = values.map(_.get()).map(classToPrecedenceMap).min
+      val min: (Int, Int) = pixelsToPrecedence.min
+      val x = min._1
+
+      outVal.set(x)
       context.write(key, outVal)
     }
   }
