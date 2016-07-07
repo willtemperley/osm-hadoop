@@ -193,10 +193,11 @@ object WayRasterizer extends Configured with Tool {
       val pixelValues = values.map(_.get())
 
       //Join
-      val pixelsToPrecedence = pixelValues.zip(pixelValues.map(classToPrecedenceMap))
+//      val pixelsToPrecedence = pixelValues.zip(pixelValues.map(classToPrecedenceMap))
+      val precedenceToPixels = pixelValues.map(classToPrecedenceMap).zip(pixelValues)
 
 //      val pixelValue = values.map(_.get()).map(classToPrecedenceMap).min
-      val min: (Int, Int) = pixelsToPrecedence.min
+      val min: (Int, Int) = precedenceToPixels.min
       val x = min._1
 
       outVal.set(x)
