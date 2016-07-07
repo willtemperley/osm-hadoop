@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
+import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.raster.{Plotter, Rasterizer}
 import org.roadlessforest.osm.writable.WayWritable
@@ -169,22 +170,12 @@ object WayRasterizer extends Configured with Tool {
 
     val outVal = new IntWritable()
 
-    val classToPrecedenceMap = Map(
-      1 -> 1,//"motorway"
-      2 -> 1,//"trunk"
-      4 -> 2,//"primary"
-      5 -> 3,//"secondary"
-      6 -> 4,//"tertiary"
-      7 -> 1,//"motorway link"
-      8 -> 3,//"primary link"
-      9 -> 5,//"unclassified"
-      10 -> 5,//"road"
-      11 -> 6,//"residential"
-      12 -> 7,//"service"
-      13 -> 5,//"track"
-      14 -> 8,//"pedestrian"
-      15 -> 9//"Other"
-    ).withDefaultValue(9)
+    var classToPrecedenceMap: Map[Int, Int] = ConfigurationFactory.getPrecedence
+
+//    override def setup(context: Reducer[CoordinateWritable, IntWritable, CoordinateWritable, IntWritable]#Context): Unit = {
+//
+//      cl
+//    }
 
     override def reduce(key: CoordinateWritable, values: Iterable[IntWritable],
                         context: Reducer[CoordinateWritable, IntWritable, CoordinateWritable, IntWritable]#Context): Unit = {

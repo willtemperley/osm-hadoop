@@ -1,5 +1,9 @@
 package org.roadlessforest.osm
 
+import org.roadlessforest.osm.config.ConfigurationFactory
+
+import scala.collection.JavaConversions._
+
 /**
   * Created by willtemperley@gmail.com on 05-Jul-16.
   */
@@ -22,7 +26,29 @@ object TestPrecedence {
     15 -> 9//"Other"
   ).withDefaultValue(9)
 
-  def main(args: Array[String]) {
+
+  def main(args: Array[String]): Unit = {
+
+    val props = ConfigurationFactory.getPrecedence
+
+    for (elem <- props) {
+      println(elem)
+    }
+
+    val x = props.toList.sortBy(f => (f._2, f._1))
+
+    x.foreach(f => print(f._1 + ","))
+  }
+
+  def ma(args: Array[String]): Unit = {
+
+    val x = classToPrecedenceMap.toList.sortBy(f => (f._2, f._1))
+
+    x.foreach(f => print(f._1 + ","))
+
+  }
+
+  def m(args: Array[String]) {
 
     val pixels = Array(7,2,3,4,9,7,3)
 
