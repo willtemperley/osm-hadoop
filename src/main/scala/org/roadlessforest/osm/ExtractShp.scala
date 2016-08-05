@@ -3,7 +3,7 @@ package org.roadlessforest.osm
 import com.vividsolutions.jts.io.WKTReader
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.{LongWritable, SequenceFile, Text}
+import org.apache.hadoop.io.{LongWritable, SequenceFile, Text, Writable}
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.shp.{GeomType, ShapeWriter}
 import org.roadlessforest.osm.writable.WayWritable
@@ -45,8 +45,9 @@ object ExtractShp {
 
     while (reader.next(key, v)) {
       val ls = wkt.read(v.get(WayWritable.geometry).toString)
-      val hwy = v.get(new Text("highway"))
-      sw.addFeature(ls, Seq(hwy))
+      val hwy = v.get(new Text("highway")).toString
+      if (hwy != null && hwy.isEmpty) println(hwy)
+      sw.addFeature(ls, Seq("test"))
     }
 
     sw.write(outPath + ".shp")

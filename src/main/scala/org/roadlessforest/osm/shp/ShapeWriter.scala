@@ -15,7 +15,7 @@ import org.opengis.feature.simple.{SimpleFeature, SimpleFeatureType}
 /**
  * Store features then write them to a shapefile
  */
-class ShapeWriter(val geomType: GeomType.Value = GeomType.Point, val srid: Int = 4326, schemaDef: String = "description:String") {
+class ShapeWriter(val geomType: GeomType.Value = GeomType.Point, val srid: Int = 4326, schemaDef: String = "highway:String") {
 
   val schema = "the_geom:" + geomType + ":srid=" + srid + "," + schemaDef
 
