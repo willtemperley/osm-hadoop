@@ -26,6 +26,22 @@ object TestPrecedence {
     15 -> 9//"Other"
   ).withDefaultValue(9)
 
+  val highwayMap = Map(
+    "motorway" -> 1,
+    "trunk" -> 2,
+    "railway" -> 3, //placeholder
+    "primary" -> 4,
+    "secondary" -> 5,
+    "tertiary" -> 6,
+    "motorway link" -> 7,
+    "primary link" -> 8,
+    "unclassified" -> 9,
+    "road" -> 10,
+    "residential" -> 11,
+    "service" -> 12,
+    "track" -> 13,
+    "pedestrian" -> 14
+  ).withDefaultValue(15)
 
   def main(args: Array[String]): Unit = {
 

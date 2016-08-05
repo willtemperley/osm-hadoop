@@ -3,7 +3,7 @@ package org.roadlessforest.osm.writable
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mrunit.mapreduce.{MapDriver, MapReduceDriver, ReduceDriver}
 import org.junit.Test
-import org.roadlessforest.osm.NodeJoiner.WayNodeReducer
+import org.roadlessforest.osm.NodeJoiner.{OsmEntityMapper, WayNodeReducer}
 
 import scala.io.Source
 import scala.collection.JavaConversions._
@@ -14,6 +14,8 @@ import scala.collection.JavaConversions._
 class NodeJoinMRTest {
 
   var reducer = new WayNodeReducer
+  var mapper = new OsmEntityMapper
+
 
   var reduceDriver = ReduceDriver.newReduceDriver(reducer)
 
@@ -43,6 +45,7 @@ class NodeJoinMRTest {
 //    mapRe.withInput(new LongWritable(), wayWritable)
 
     reduceDriver.runTest()
+
 
   }
 

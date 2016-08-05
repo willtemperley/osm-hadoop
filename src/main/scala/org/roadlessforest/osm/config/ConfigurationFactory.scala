@@ -36,7 +36,9 @@ object ConfigurationFactory {
     val loader = Thread.currentThread().getContextClassLoader
 
     val resourceStream = loader.getResourceAsStream(propertiesFileName)
+
     props.load(resourceStream)
+
     props
   }
 }
