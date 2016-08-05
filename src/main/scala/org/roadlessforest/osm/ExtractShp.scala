@@ -46,8 +46,7 @@ object ExtractShp {
     while (reader.next(key, v)) {
       val ls = wkt.read(v.get(WayWritable.geometry).toString)
       val hwy = v.get(new Text("highway")).toString
-      if (hwy != null && hwy.isEmpty) println(hwy)
-      sw.addFeature(ls, Seq("test"))
+      sw.addFeature(ls, Seq(hwy))
     }
 
     sw.write(outPath + ".shp")
