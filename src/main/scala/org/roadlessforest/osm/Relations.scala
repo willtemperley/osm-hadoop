@@ -45,10 +45,10 @@ object Relations {
 
     val table = getTable(tableName)
     println(table.getName)
-    val scan = new Scan
+    var scan = new Scan
     scan.addFamily(cf)
     val filter = new SingleColumnValueFilter(cf, "boundary".getBytes, CompareOp.EQUAL, new BinaryComparator(Bytes.toBytes("national_park")))
-    scan.setFilter(filter)
+    scan = scan.setFilter(filter)
 
 //    table.getScanner(scan)
     // Getting the scan result
