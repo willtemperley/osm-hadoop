@@ -30,7 +30,7 @@ object Relations {
       }""".stripMargin
 
 
-    val conf = new SparkConf()
+    val conf = ConfigurationFactory.getSparkConf
     conf.setAppName(this.getClass.getName)
 
     val sc = new SparkContext(conf)
