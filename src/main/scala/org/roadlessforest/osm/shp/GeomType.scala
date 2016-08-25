@@ -3,7 +3,7 @@ package org.roadlessforest.osm.shp
 /**
   * Created by willtemperley@gmail.com on 22-Jan-16.
   *
-  * Why the chuff this doesn't exist somewhere is strange
+  * Why this doesn't exist somewhere is strange
   *
   *
   */

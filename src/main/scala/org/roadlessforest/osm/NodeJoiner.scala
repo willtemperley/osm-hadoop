@@ -84,7 +84,7 @@ object NodeJoiner extends Configured with Tool {
     val nn = new NodeWritable
 
     var layerTag: String = _
-    var wayTags: Array[String] = _
+//    var wayTags: Array[String] = _
     var wayFilter: (Entity) => Boolean = _
 
     /*
@@ -94,20 +94,20 @@ object NodeJoiner extends Configured with Tool {
 
       layerTag = context.getConfiguration.get(WayTagsParameterName)
 
-      wayTags = context.getConfiguration.get(LayerTagParameterName).split(",")
+//      wayTags = context.getConfiguration.get(LayerTagParameterName).split(",")
 
-      if (wayTags == null || wayTags.isEmpty) {
-        throw new RuntimeException("No filter tag specified.")
-      }
+//      if (wayTags == null || wayTags.isEmpty) {
+//        throw new RuntimeException("No filter tag specified.")
+//      }
 
-      wayFilter = EntityFilters.filterByTags(layerTag) _
+      wayFilter = EntityFilters.filterByTags(layerTag)
     }
 
     override def map(key: Text, osmBlock: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
 
       val entities = readBlob(osmBlock.get().asInstanceOf[Array[Byte]], key.toString)
 
-      for (value <- entities) {
+      for (value: Entity <- entities) {
 
         /*
         Way nodes are emitted alongside their node ids.
@@ -129,12 +129,13 @@ object NodeJoiner extends Configured with Tool {
            */
           val wayWritable = new WayWritable() //purposefully recreated as it's dangerous to re-use a mapwritable
 
-          for (t: String <- wayTags) {
-            val theTag: Option[Tag] = value.getTags.find(f => f.getKey.equals(t))
-            if (theTag.isDefined) {
-              wayWritable.put(t, theTag.get.getValue)
-            }
-          }
+          value.getTags.foreach( f=> wayWritable.put(f.getKey, f.getValue))
+//          for (t: String <- wayTags) {
+//            val theTag: Option[Tag] = value.getTags.find(f => f.getKey.equals(t))
+//            if (theTag.isDefined) {
+//              wayWritable.put(t, theTag.get.getValue)
+//            }
+//          }
 
           k.set(way.getId)
           v.set(wayWritable)

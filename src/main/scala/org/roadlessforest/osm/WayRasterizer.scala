@@ -123,7 +123,6 @@ object WayRasterizer extends Configured with Tool {
 
       val plotter = new Plotter {
 
-
         override def plot(x: Int, y: Int): Unit = {
           coord.set(x, y)
           context.write(coord, pixVal)

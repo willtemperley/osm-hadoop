@@ -45,6 +45,13 @@
 
     <dependencies>
 
+        <!-- spark hbase -->
+        <dependency>
+            <groupId>HBase-Spark</groupId>
+            <artifactId>hbase-spark-connector</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Geotools-->
         <dependency>
             <groupId>org.geotools</groupId>

@@ -2,7 +2,7 @@ package org.roadlessforest.osm
 
 import com.vividsolutions.jts.io.WKTReader
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.io.{LongWritable, SequenceFile, Text, Writable}
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.shp.{GeomType, ShapeWriter}
@@ -10,8 +10,6 @@ import org.roadlessforest.osm.writable.WayWritable
 
 /**
   * Created by willtemperley@gmail.com on 31-May-16.
-  *
-  *
   *
   */
 object ExtractShp {
@@ -24,7 +22,7 @@ object ExtractShp {
     val path = new Path(args(0))
     val outPath = args(1)
 
-    val fs = path.getFileSystem(configuration)
+    val fs: FileSystem = path.getFileSystem(configuration)
     fs.listStatus(path).foreach(f =>
       convertFile(configuration, f.getPath, outPath + f.getPath.getName)
     )

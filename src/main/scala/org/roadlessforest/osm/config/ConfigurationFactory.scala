@@ -13,7 +13,6 @@ import scala.collection.JavaConversions._
  */
 object ConfigurationFactory {
 
-
   def get: Configuration = {
 
     val props: Properties = getProperties("hbase-config.properties")
