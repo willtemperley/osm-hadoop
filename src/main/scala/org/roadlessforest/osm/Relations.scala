@@ -2,6 +2,7 @@ package org.roadlessforest.osm
 
 import java.io.IOException
 
+import org.apache.commons.lang.ArrayUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{ConnectionFactory, ResultScanner, Scan, Table}
@@ -54,6 +55,12 @@ object Relations {
     val iterator = Iterator.continually(scanner.next).takeWhile(_ != null)
 
     for (x <- iterator) {
+
+      val rowKey = x.getRow
+      ArrayUtils.reverse(rowKey)
+
+      println(Bytes.toLong(rowKey))
+
       val value = x.getValue(cf, "name".getBytes)
       if (value != null) {
         println(Bytes.toString(value))
