@@ -41,16 +41,16 @@ object Relations {
 
   def main(args: Array[String]): Unit = {
 
-    val table = getTable("relations")
+    val table = getTable("ways")
     println(table.getName)
     val scan = new Scan
     scan.addFamily(cf)
     val filter = new SingleColumnValueFilter(cf, "boundary".getBytes, CompareOp.EQUAL, new BinaryComparator(Bytes.toBytes("national_park")))
     scan.setFilter(filter)
 
-    table.getScanner(scan)
+//    table.getScanner(scan)
     // Getting the scan result
-    val scanner = table.getScanner(scan);
+    val scanner = table.getScanner(scan)
 
     val iterator = Iterator.continually(scanner.next).takeWhile(_ != null)
 
