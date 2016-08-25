@@ -34,6 +34,7 @@ object ConfigurationFactory {
 
 
   def hbaseProperties: Properties = {
+
     val props: Properties = getProperties("hbase-config.properties")
     props
   }
