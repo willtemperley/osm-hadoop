@@ -41,7 +41,9 @@ object Relations {
 
   def main(args: Array[String]): Unit = {
 
-    val table = getTable("ways")
+    val tableName = args(0)
+
+    val table = getTable(tableName)
     println(table.getName)
     val scan = new Scan
     scan.addFamily(cf)
