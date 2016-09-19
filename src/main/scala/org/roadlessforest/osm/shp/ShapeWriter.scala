@@ -24,15 +24,6 @@ class ShapeWriter(val geomType: GeomType.Value = GeomType.Point, val srid: Int =
 
   val features = new util.ArrayList[SimpleFeature]
 
-//  private def getCoords(env: Envelope): Array[Coordinate] = {
-//    val c1: Coordinate = new Coordinate(env.getMinX, env.getMinY)
-//    val c2: Coordinate = new Coordinate(env.getMinX, env.getMaxY)
-//    val c3: Coordinate = new Coordinate(env.getMaxX, env.getMaxY)
-//    val c4: Coordinate = new Coordinate(env.getMaxX, env.getMinY)
-//    val c5: Coordinate = new Coordinate(env.getMinX, env.getMinY)
-//    val c: Array[Coordinate] = Array[Coordinate](c1, c2, c3, c4, c5)
-//    return c
-//  }
 
   def addFeature(geometry: Geometry, attrs: Seq[Any] = null): SimpleFeature = {
 

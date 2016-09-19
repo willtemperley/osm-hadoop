@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate
 import com.vividsolutions.jts.io.WKTReader
 import org.apache.hadoop.conf.{Configuration, Configured}
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.io._
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInputFormat}
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
@@ -68,11 +69,30 @@ object WayRasterizer extends Configured with Tool {
 
   }
 
+  class WayLoader extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
+
+    val geometryKey = new Text("geometry")
+    val wktReader = new WKTReader
+
+    override def map(key: LongWritable, value: WayWritable,
+                     context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
+
+      val lineString: Writable = value.get(geometryKey).asInstanceOf[Text]
+
+      val geom = wktReader.read(lineString.toString)
+
+
+
+
+    }
+
+  }
+
 
   /**
     *
     */
-  class WayRasterMapper extends Mapper[LongWritable, WayWritable, CoordinateWritable, IntWritable]  {
+  class WayRasterMapper extends Mapper[LongWritable, WayWritable, CoordinateWritable, IntWritable] {
 
     var tag: String = _
 
