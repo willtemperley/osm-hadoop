@@ -112,7 +112,11 @@ object NodeJoiner extends Configured with Tool {
         /*
         Way nodes are emitted alongside their node ids.
          */
-        if (value.getType.equals(EntityType.Way) && wayFilter(value)) {
+//        if (value.getType.equals(EntityType.Way) && wayFilter(value)) {
+        /*
+        Quick hack to pass through all ways
+         */
+        if (value.getType.equals(EntityType.Way)) {
           val way = value.asInstanceOf[Way]
 
           way.getWayNodes.zipWithIndex.foreach(
