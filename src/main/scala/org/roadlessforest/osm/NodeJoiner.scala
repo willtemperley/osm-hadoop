@@ -83,7 +83,7 @@ object NodeJoiner extends Configured with Tool {
     val wn = new WayNodeWritable
     val nn = new NodeWritable
 
-    var layerTag: String = _
+//    var layerTag: String = _
 //    var wayTags: Array[String] = _
     var wayFilter: (Entity) => Boolean = _
 
@@ -92,7 +92,7 @@ object NodeJoiner extends Configured with Tool {
      */
     override def setup(context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
 
-      layerTag = context.getConfiguration.get(WayTagsParameterName)
+//      layerTag = context.getConfiguration.get(WayTagsParameterName)
 
 //      wayTags = context.getConfiguration.get(LayerTagParameterName).split(",")
 
@@ -100,7 +100,7 @@ object NodeJoiner extends Configured with Tool {
 //        throw new RuntimeException("No filter tag specified.")
 //      }
 
-      wayFilter = EntityFilters.filterByTags(layerTag)
+      wayFilter = EntityFilters.filterByTags("highway")
     }
 
     override def map(key: Text, osmBlock: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {

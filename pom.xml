@@ -45,6 +45,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.openstreetmap.osmosis</groupId>
+            <artifactId>osmosis-hbase</artifactId>
+            <type>test-jar</type>
+            <version>0.44.2</version>
+        </dependency>
         <!-- spark hbase -->
         <!--<dependency>-->
             <!--<groupId>HBase-Spark</groupId>-->
