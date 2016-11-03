@@ -112,11 +112,8 @@ object NodeJoiner extends Configured with Tool {
         /*
         Way nodes are emitted alongside their node ids.
          */
-//        if (value.getType.equals(EntityType.Way) && wayFilter(value)) {
-        /*
-        Quick hack to pass through all ways
-         */
-        if (value.getType.equals(EntityType.Way)) {
+        if (value.getType.equals(EntityType.Way) && wayFilter(value)) {
+
           val way = value.asInstanceOf[Way]
 
           way.getWayNodes.zipWithIndex.foreach(
@@ -133,13 +130,7 @@ object NodeJoiner extends Configured with Tool {
            */
           val wayWritable = new WayWritable() //purposefully recreated as it's dangerous to re-use a mapwritable
 
-          value.getTags.foreach( f=> wayWritable.put(f.getKey, f.getValue))
-//          for (t: String <- wayTags) {
-//            val theTag: Option[Tag] = value.getTags.find(f => f.getKey.equals(t))
-//            if (theTag.isDefined) {
-//              wayWritable.put(t, theTag.get.getValue)
-//            }
-//          }
+          value.getTags.foreach((f: Tag) => wayWritable.put(f.getKey, f.getValue))
 
           k.set(way.getId)
           v.set(wayWritable)
@@ -171,7 +162,6 @@ object NodeJoiner extends Configured with Tool {
 
     override def reduce(key: LongWritable, values: Iterable[OsmEntityWritable],
                         context: Reducer[LongWritable, OsmEntityWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
-
 
       /*
       Partition the values into their respective types.
