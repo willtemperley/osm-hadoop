@@ -55,8 +55,8 @@ object WayLoader extends Configured with Tool {
     job.setReducerClass(classOf[HBaseWayReducer])
 
     job.setInputFormatClass(classOf[SequenceFileInputFormat[_,_]])
-    job.setMapOutputKeyClass(classOf[LongWritable])
-    job.setMapOutputValueClass(classOf[OsmEntityWritable])
+    job.setMapOutputKeyClass(classOf[ImmutableBytesWritable])
+    job.setMapOutputValueClass(classOf[KeyValue])
 
     job.setOutputKeyClass(classOf[ImmutableBytesWritable])
     job.setOutputValueClass(classOf[KeyValue])
@@ -72,12 +72,19 @@ object WayLoader extends Configured with Tool {
     HFileOutputFormat2.configureIncrementalLoad(job, outTable, outTable.getRegionLocator)
 
     if (job.waitForCompletion(true)) 0 else 1
+
   }
 
   /**
     * Identity mapper
     */
-  class WayMapper extends Mapper[LongWritable, OsmEntityWritable, LongWritable, OsmEntityWritable]
+/*  class WayMapper extends Mapper[LongWritable, OsmEntityWritable, ImmutableBytesWritable, Cell] {
+
+    override def map(key: LongWritable, value: OsmEntityWritable, context: Mapper[LongWritable, OsmEntityWritable, ImmutableBytesWritable, Cell]#Context): Unit = {
+      hbaseKey.set(k)
+      val cell = new KeyValue(hbaseKey.get(), EntityDataAccess.data, Bytes.toBytes("geometry"), out)
+    }
+  }*/
 
   class HBaseWayReducer extends Reducer[LongWritable, OsmEntityWritable, ImmutableBytesWritable, Cell] {
 

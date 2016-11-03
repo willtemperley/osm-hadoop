@@ -45,6 +45,8 @@ object WayRasterizer extends Configured with Tool {
     val conf = getConf
     conf.set(valueKey, args(2))
 
+    println("value key: " + valueKey.toString)
+
     val job = Job.getInstance(conf)
 
     job.setJarByClass(this.getClass)
@@ -69,24 +71,21 @@ object WayRasterizer extends Configured with Tool {
 
   }
 
-  class WayLoader extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
-
-    val geometryKey = new Text("geometry")
-    val wktReader = new WKTReader
-
-    override def map(key: LongWritable, value: WayWritable,
-                     context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
-
-      val lineString: Writable = value.get(geometryKey).asInstanceOf[Text]
-
-      val geom = wktReader.read(lineString.toString)
-
-
-
-
-    }
-
-  }
+//  class WayLoader extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
+//
+//    val geometryKey = new Text("geometry")
+//    val wktReader = new WKTReader
+//
+//    override def map(key: LongWritable, value: WayWritable,
+//                     context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
+//
+//      val lineString: Writable = value.get(geometryKey).asInstanceOf[Text]
+//
+//      val geom = wktReader.read(lineString.toString)
+//
+//    }
+//
+//  }
 
 
   /**

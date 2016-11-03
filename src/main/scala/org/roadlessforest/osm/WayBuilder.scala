@@ -73,44 +73,6 @@ object WayBuilder extends Configured with Tool {
     */
   class WayMapper extends Mapper[LongWritable, OsmEntityWritable, LongWritable, OsmEntityWritable]
 
-
-  class HBaseWayReducer extends Reducer[LongWritable, OsmEntityWritable, ImmutableBytesWritable, Cell] {
-
-    val gf = new GeometryFactory(new PrecisionModel())
-    val wkbWriter = new WKBWriter()
-    val hbaseKey = new ImmutableBytesWritable()
-
-    override def reduce(key: LongWritable, values: Iterable[OsmEntityWritable],
-                        context: Reducer[LongWritable, OsmEntityWritable, ImmutableBytesWritable, Cell]#Context): Unit = {
-
-      val(ways, nodes) =  values.map(_.get()).partition(_.isInstanceOf[WayWritable])
-
-      if (ways.size != 1) {
-        throw new RuntimeException("Expected a single Way. Actual number found: " + ways.size)
-      }
-
-      val nodeList = nodes.map(_.asInstanceOf[ReferencedWayNodeWritable]).toList.sortBy(_.ordinal)
-
-      val coords: Array[Coordinate] = nodeList.map(f => new Coordinate(f.x, f.y)).toArray
-
-      if (coords.length > 1) {
-
-        val geom = gf.createLineString(coords)
-        val out = wkbWriter.write(geom)
-
-        val k = Bytes.toBytes(key.get())
-
-        hbaseKey.set(k)
-        val cell = new KeyValue(hbaseKey.get(), EntityDataAccess.data, Bytes.toBytes("geometry"), out)
-
-        context.write(hbaseKey, cell)
-      }
-
-    }
-
-  }
-
-
   class WayReducer extends Reducer[LongWritable, OsmEntityWritable, LongWritable, WayWritable] {
 
     val gf = new GeometryFactory(new PrecisionModel())
@@ -140,7 +102,6 @@ object WayBuilder extends Configured with Tool {
         wkt.set(out)
         wayWritable.put(WayWritable.geometry, wkt)
         context.write(key, wayWritable)
-
       }
 
     }
