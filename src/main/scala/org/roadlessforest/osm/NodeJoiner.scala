@@ -100,7 +100,7 @@ object NodeJoiner extends Configured with Tool {
 //        throw new RuntimeException("No filter tag specified.")
 //      }
 
-      wayFilter = EntityFilters.filterByTags("highway")
+      wayFilter = EntityFilters.filterByTags("railway")
     }
 
     override def map(key: Text, osmBlock: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
