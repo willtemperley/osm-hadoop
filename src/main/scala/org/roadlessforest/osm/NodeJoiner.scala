@@ -21,7 +21,7 @@ import scala.collection.JavaConversions._
 object NodeJoiner extends Configured with Tool {
 
   val LayerTagParameterName = "LayerTag" // The layer we're extracting
-  val WayTagsParameterName = "WayTags" // a list of tags to keep
+  val WayTagsParameterName = "WayTags" // a list of tags to keep //currently unused
 
   def main(args: Array[String]): Unit = {
 
@@ -83,8 +83,6 @@ object NodeJoiner extends Configured with Tool {
     val wn = new WayNodeWritable
     val nn = new NodeWritable
 
-//    var layerTag: String = _
-//    var wayTags: Array[String] = _
     var wayFilter: (Entity) => Boolean = _
 
     /*
@@ -92,15 +90,10 @@ object NodeJoiner extends Configured with Tool {
      */
     override def setup(context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {
 
-//      layerTag = context.getConfiguration.get(WayTagsParameterName)
+      val layerTag: String = context.getConfiguration.get(LayerTagParameterName)
 
-//      wayTags = context.getConfiguration.get(LayerTagParameterName).split(",")
+      wayFilter = EntityFilters.filterByTags(layerTag)
 
-//      if (wayTags == null || wayTags.isEmpty) {
-//        throw new RuntimeException("No filter tag specified.")
-//      }
-
-      wayFilter = EntityFilters.filterByTags("railway")
     }
 
     override def map(key: Text, osmBlock: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, LongWritable, OsmEntityWritable]#Context): Unit = {

@@ -45,8 +45,6 @@ object WayRasterizer extends Configured with Tool {
     val conf = getConf
     conf.set(valueKey, args(2))
 
-    println("value key: " + valueKey.toString)
-
     val job = Job.getInstance(conf)
 
     job.setJarByClass(this.getClass)
