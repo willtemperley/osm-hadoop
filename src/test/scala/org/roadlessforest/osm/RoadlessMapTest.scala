@@ -13,7 +13,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver
 import org.junit.Test
-import org.roadlessforest.osm.buffer.WayBuffer
+import org.roadlessforest.osm.buffer.RoadlessMap
 import org.roadlessforest.osm.writable.WayWritable
 
 /**
@@ -73,8 +73,8 @@ class RoadlessMap {
 
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
-    mapReduceDriver.setMapper(new WayBuffer.WayRasterMapper)
-    mapReduceDriver.setReducer(new WayBuffer.BufferReducer)
+    mapReduceDriver.setMapper(new RoadlessMap.WayRasterMapper)
+    mapReduceDriver.setReducer(new RoadlessMap.BufferReducer)
     mapReduceDriver
   }
 

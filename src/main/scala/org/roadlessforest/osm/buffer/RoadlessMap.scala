@@ -26,7 +26,7 @@ import scala.collection.JavaConversions._
 /*
 *
 */
-object WayBuffer extends Configured with Tool {
+object RoadlessMap extends Configured with Tool {
 
 //  val width: Int = 43200
 //  val height: Int = 21600
@@ -35,14 +35,14 @@ object WayBuffer extends Configured with Tool {
 
   def main(args: Array[String]) {
 
-    val res = ToolRunner.run(new Configuration(), WayBuffer, args)
+    val res = ToolRunner.run(new Configuration(), RoadlessMap, args)
     System.exit(res)
   }
 
   override def run(args: Array[String]): Int = {
 
     if (args.length != 3) {
-      println("Usage: WayBuffer input-seqfile-path output-seqfile-path tag")
+      println("Usage: RoadlessMap input-seqfile-path out-table-name tag")
       return 1
     }
 
