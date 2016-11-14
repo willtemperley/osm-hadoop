@@ -141,7 +141,7 @@ object RoadlessMap extends Configured with Tool {
 
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
-      val tiles  = TileCalculator.tilesForEnvelope(env, 9)
+      val tiles  = TileCalculator.tilesForEnvelope(env, 10)
       import scala.collection.JavaConversions._
       for (tile <- tiles) {
         val envelopeAsPolygon = tile.getEnvelopeAsPolygon
@@ -180,7 +180,7 @@ object RoadlessMap extends Configured with Tool {
        */
       for (value <- values) {
         val geometry: Geometry = OperatorImportFromWkt.local.execute(0, Geometry.Type.Polyline, value.toString, null)
-        val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, 0.005, null)
+        val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, 0.08333, null)
         tileRasterizer.rasterizePolygon(outputGeom.asInstanceOf[Polygon])
       }
 
