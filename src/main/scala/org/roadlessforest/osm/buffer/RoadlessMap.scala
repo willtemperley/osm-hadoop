@@ -9,7 +9,7 @@ import org.apache.hadoop.conf.{Configuration, Configured}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.hbase.client.{Mutation, Put}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.TableReducer
+import org.apache.hadoop.hbase.mapreduce.{TableMapReduceUtil, TableReducer}
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.io._
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInputFormat}
@@ -58,16 +58,16 @@ object WayBuffer extends Configured with Tool {
 
     job.setInputFormatClass(classOf[SequenceFileInputFormat[_, _]])
 
-    job.setMapOutputKeyClass(classOf[CoordinateWritable])
-    job.setMapOutputValueClass(classOf[IntWritable])
+    job.setMapOutputKeyClass(classOf[ImmutableBytesWritable])
+    job.setMapOutputValueClass(classOf[Text])
 
-    job.setOutputKeyClass(classOf[CoordinateWritable])
-    job.setOutputValueClass(classOf[IntWritable])
+//    job.setOutputKeyClass(classOf[CoordinateWritable])
+//    job.setOutputValueClass(classOf[IntWritable])
 
     FileInputFormat.addInputPath(job, new Path(args(0)))
 
-    job.setOutputFormatClass(classOf[SequenceFileOutputFormat[_, _]])
-    FileOutputFormat.setOutputPath(job, new Path(args(1)))
+    //Reduces
+    TableMapReduceUtil.initTableReducerJob("buff", classOf[BufferReducer], job)
 
     if (job.waitForCompletion(true)) 0 else 1
   }
