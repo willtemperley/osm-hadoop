@@ -16,9 +16,7 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
-import org.openstreetmap.osmosis.hbase.common.EntityDataAccess
-import org.openstreetmap.osmosis.hbase.mr.WayMapper
-import org.roadlessforest.osm.WayBuilder.WayReducer
+import org.roadlessforest.osm.WayBuilder.{WayMapper, WayReducer}
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.writable.{OsmEntityWritable, ReferencedWayNodeWritable, WayWritable}
 
@@ -113,9 +111,9 @@ object WayLoader extends Configured with Tool {
         val k = Bytes.toBytes(key.get())
 
         hbaseKey.set(k)
-        val cell = new KeyValue(hbaseKey.get(), EntityDataAccess.data, Bytes.toBytes("geometry"), out)
+//        val cell = new KeyValue(hbaseKey.get(), EntityDataAccess.data, Bytes.toBytes("geometry"), out)
 
-        context.write(hbaseKey, cell)
+//        context.write(hbaseKey, cell)
       }
 
     }

@@ -7,7 +7,6 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.io.{ArrayPrimitiveWritable, LongWritable, Text}
 import org.apache.hadoop.mrunit.mapreduce.{MapDriver, MapReduceDriver, ReduceDriver}
 import org.junit.Test
-import org.openstreetmap.osmosis.hbase.MapReduceUnitSetup
 import org.openstreetmap.osmosis.pbf2.v0_6.impl.{PbfRawBlob, PbfStreamSplitter}
 import org.roadlessforest.osm.NodeJoiner.{OsmEntityMapper, WayNodeReducer}
 
@@ -17,7 +16,7 @@ import scala.collection.JavaConversions._
 /**
   * Created by willtemperley@gmail.com on 07-Apr-16.
   */
-class NodeJoinMRTest extends MapReduceUnitSetup {
+class NodeJoinMRTest  {
 
 //  super.setupSerialization(new Map)
 val snapshotBinaryFile: File = new File("src/test/resources/data/template/v0_6/db-snapshot.pbf")
@@ -29,7 +28,6 @@ val snapshotBinaryFile: File = new File("src/test/resources/data/template/v0_6/d
   mapReduceDriver.setMapper(new OsmEntityMapper)
   mapReduceDriver.setReducer(new WayNodeReducer)
 
-  setupSerialization(mapReduceDriver)
 
 
   @Test

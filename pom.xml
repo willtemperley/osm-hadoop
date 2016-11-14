@@ -44,12 +44,17 @@
     </profiles>
 
     <dependencies>
+        <dependency>
+            <groupId>org.roadlessforest</groupId>
+            <artifactId>tiler</artifactId>
+            <version>0.2</version>
+        </dependency>
+
 
         <dependency>
-            <groupId>org.openstreetmap.osmosis</groupId>
-            <artifactId>osmosis-hbase</artifactId>
-            <type>test-jar</type>
-            <version>0.44.2</version>
+            <groupId>com.esri.geometry</groupId>
+            <artifactId>esri-geometry-api</artifactId>
+            <version>1.2.1</version>
         </dependency>
         <!-- spark hbase -->
         <!--<dependency>-->
@@ -68,11 +73,11 @@
             <version>1.2.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.openstreetmap.osmosis</groupId>
-            <artifactId>osmosis-hbase</artifactId>
-            <version>0.44.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.openstreetmap.osmosis</groupId>-->
+            <!--<artifactId>osmosis-hbase</artifactId>-->
+            <!--<version>0.44.2</version>-->
+        <!--</dependency>-->
 
         <!-- Geotools-->
         <dependency>

@@ -14,9 +14,6 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
-import org.openstreetmap.osmosis.hbase.common.EntityDataAccess
-import org.openstreetmap.osmosis.hbase.mr.WayMapper
-import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.writable.{OsmEntityWritable, ReferencedWayNodeWritable, WayWritable}
 
 import scala.collection.JavaConversions._
