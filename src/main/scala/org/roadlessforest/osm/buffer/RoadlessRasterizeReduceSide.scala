@@ -203,7 +203,7 @@ object RoadlessMap extends Configured with Tool {
 //      for (aByte <- bytes) {
 //        fileOutputStream.write(aByte)
 //      }
-//    }
+    }
 
   }
 
