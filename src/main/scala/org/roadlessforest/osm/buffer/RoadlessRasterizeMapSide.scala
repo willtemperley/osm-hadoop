@@ -49,7 +49,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
     job.setJarByClass(this.getClass)
 
     job.setMapperClass(classOf[WayRasterMapper])
-    job.setReducerClass(classOf[BufferReducer])
+    job.setReducerClass(classOf[RasterizedTileStack])
 
     job.setInputFormatClass(classOf[SequenceFileInputFormat[_, _]])
 
@@ -59,7 +59,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
     FileInputFormat.addInputPath(job, new Path(args(0)))
 
     //Reduces
-    TableMapReduceUtil.initTableReducerJob("buff", classOf[BufferReducer], job)
+    TableMapReduceUtil.initTableReducerJob("buff", classOf[RasterizedTileStack], job)
 
     if (job.waitForCompletion(true)) 0 else 1
   }
@@ -160,7 +160,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
   }
 
   //
-  class BufferReducer extends TableReducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
+  class RasterizedTileStack extends TableReducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
 
     val outVal = new IntWritable()
     var classToPrecedenceMap: Map[Int, Int] = ConfigurationFactory.getPrecedence

@@ -74,7 +74,7 @@ class RoadlessMapTest {
 
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
-    mapReduceDriver.setMapper(new RoadlessMap.WayRasterMapper)
+    mapReduceDriver.setMapper(new RoadlessMap.WayMapper)
     mapReduceDriver.setReducer(new RoadlessMap.BufferReducer)
     mapReduceDriver
   }
@@ -88,7 +88,7 @@ class RoadlessMapTest {
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
     mapReduceDriver.setMapper(new RoadlessRasterizeMapSide.WayRasterMapper)
-    mapReduceDriver.setReducer(new RoadlessRasterizeMapSide.BufferReducer)
+    mapReduceDriver.setReducer(new RoadlessRasterizeMapSide.RasterizedTileStack)
     mapReduceDriver
   }
 
