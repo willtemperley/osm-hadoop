@@ -52,7 +52,7 @@
 
         <dependency>
             <groupId>com.esri.geometry.examples</groupId>
-            <artifactId>ShapeFileGeometryCursor</artifactId>
+            <artifactId>ShapefileGeometryCursor</artifactId>
             <version>1.0.0</version>
         </dependency>
 
