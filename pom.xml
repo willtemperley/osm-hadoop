@@ -50,6 +50,11 @@
             <version>0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.esri.geometry.examples</groupId>
+            <artifactId>ShapeFileGeometryCursor</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>com.esri.geometry</groupId>

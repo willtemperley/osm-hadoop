@@ -91,6 +91,7 @@ object RoadlessMap extends Configured with Tool {
 
     //the field on which to base the raster value
     val geometryKey = new Text("geometry")
+    var zoomLevel = 10
 
     val wkt = new WKTReader
 
@@ -141,7 +142,7 @@ object RoadlessMap extends Configured with Tool {
 
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
-      val tiles  = TileCalculator.tilesForEnvelope(env, 10)
+      val tiles  = TileCalculator.tilesForEnvelope(env, zoomLevel)
       import scala.collection.JavaConversions._
       for (tile <- tiles) {
         val envelopeAsPolygon = tile.getEnvelopeAsPolygon
@@ -173,7 +174,7 @@ object RoadlessMap extends Configured with Tool {
       //TODO: translate unit tests
 
       val tile = TileCalculator.decodeTile(key.get())
-      val tileRasterizer = new TileRasterizer(tile)
+      val tileRasterizer = new TileRasterizer(tile, new IntbackedScanCallback(256, 256))
 
       /*
       Iterate all geometries,
@@ -191,7 +192,7 @@ object RoadlessMap extends Configured with Tool {
       put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
       context.write(key, put)
 
-//      writeDebugTile(tile, image)
+      writeDebugTile(tile, image)
 
     }
 
