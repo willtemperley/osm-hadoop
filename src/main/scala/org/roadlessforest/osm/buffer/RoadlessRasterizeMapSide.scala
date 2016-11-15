@@ -196,7 +196,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
       context.write(key, put)
 
-      writeDebugTile(tile, image)
+//      writeDebugTile(tile, image)
 
     }
 
