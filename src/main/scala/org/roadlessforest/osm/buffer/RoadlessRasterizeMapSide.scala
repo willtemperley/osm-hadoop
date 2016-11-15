@@ -30,14 +30,14 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
   def main(args: Array[String]) {
 
-    val res = ToolRunner.run(new Configuration(), RoadlessMap, args)
+    val res = ToolRunner.run(new Configuration(), RoadlessRasterizeMapSide, args)
     System.exit(res)
   }
 
   override def run(args: Array[String]): Int = {
 
     if (args.length != 3) {
-      println("Usage: RoadlessMap input-seqfile-path out-table-name tag")
+      println("Usage: RoadlessRasterizeReduceSide input-seqfile-path out-table-name tag")
       return 1
     }
 
