@@ -35,7 +35,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
 
   def main(args: Array[String]) {
 
-    val res = ToolRunner.run(new Configuration(), RoadlessRasterizeReduceSide, args)
+    val res = ToolRunner.run(new Configuration(), RoadlessRoadCount, args)
     System.exit(res)
   }
 

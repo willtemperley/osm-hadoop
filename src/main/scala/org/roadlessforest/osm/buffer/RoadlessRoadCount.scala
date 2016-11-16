@@ -19,13 +19,18 @@ import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.writable.WayWritable
-import org.xerial.snappy.Snappy
 import xyz.TileCalculator
 
 import scala.collection.JavaConversions._
 
-object RoadlessRasterizeMapSide extends Configured with Tool {
+/*
+*
+*/
+object RoadlessRoadCount extends Configured with Tool {
 
+//  val width: Int = 43200
+//  val height: Int = 21600
+//  val tileSize: Int = 1080
   val valueKey = "valueKey"
 
   def main(args: Array[String]) {
@@ -37,7 +42,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
   override def run(args: Array[String]): Int = {
 
     if (args.length != 3) {
-      println("Usage: RoadlessRasterizeMapSide input-seqfile-path out-table-name tag")
+      println("Usage: RoadlessRoadCount input-seqfile-path out-table-name tag")
       return 1
     }
 
@@ -48,18 +53,19 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
     job.setJarByClass(this.getClass)
 
-    job.setMapperClass(classOf[WayRasterMapper])
-    job.setReducerClass(classOf[RasterizedTileStack])
+    job.setMapperClass(classOf[WayMapper])
+    job.setReducerClass(classOf[BufferReducer])
 
     job.setInputFormatClass(classOf[SequenceFileInputFormat[_, _]])
 
     job.setMapOutputKeyClass(classOf[ImmutableBytesWritable])
-    job.setMapOutputValueClass(classOf[ImmutableBytesWritable])
+    job.setMapOutputValueClass(classOf[IntWritable])
+
 
     FileInputFormat.addInputPath(job, new Path(args(0)))
 
     //Reduces
-    TableMapReduceUtil.initTableReducerJob("buff", classOf[RasterizedTileStack], job)
+    TableMapReduceUtil.initTableReducerJob("buff", classOf[BufferReducer], job)
 
     if (job.waitForCompletion(true)) 0 else 1
   }
@@ -67,11 +73,11 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
   /**
     *
     */
-  class WayRasterMapper extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
+  class WayMapper extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, IntWritable] {
 
     var tag: String = _
 
-    override def setup(context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
+    override def setup(context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, IntWritable]#Context): Unit = {
 
       tag = context.getConfiguration.get(valueKey)
 
@@ -83,6 +89,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
     //the field on which to base the raster value
     val geometryKey = new Text("geometry")
+    var zoomLevel = 12
 
     val wkt = new WKTReader
 
@@ -90,16 +97,41 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
     val rasterValueKey = new Text()
 
+    val pixVal = new IntWritable
+    val coord = new CoordinateWritable
+
+    val highwayMap = Map(
+      "motorway" -> 1,
+      "trunk" -> 2,
+      "railway" -> 3, //placeholder
+      "primary" -> 4,
+      "secondary" -> 5,
+      "tertiary" -> 6,
+      "motorway link" -> 7,
+      "primary link" -> 8,
+      "unclassified" -> 9,
+      "road" -> 10,
+      "residential" -> 11,
+      "service" -> 12,
+      "track" -> 13,
+      "pedestrian" -> 14
+    ).withDefaultValue(15)
+
     val tileWritable = new ImmutableBytesWritable
-    val spatialReference = SpatialReference.create(4326)
-    val bitsetWritable = new ImmutableBytesWritable
-    var zoomLevel = 10
+    val intWritable = new IntWritable(1)
 
     override def map(key: LongWritable, value: WayWritable,
-                     context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
+                     context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, IntWritable]#Context): Unit = {
 
       //The string which will be converted to a raster value
       val rasterValueString = value.get(rasterValueKey).asInstanceOf[Text].toString
+
+      //fixme hackery
+      if (rasterValueKey.toString.equals("highway")) {
+        pixVal.set(highwayMap(rasterValueString))
+      } else {
+        pixVal.set(1)
+      }
 
       val lineString: Text = value.get(geometryKey).asInstanceOf[Text]
       val geometry = OperatorImportFromWkt.local().execute(0, Geometry.Type.Polyline, lineString.toString, null)
@@ -110,68 +142,67 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
       val tiles  = TileCalculator.tilesForEnvelope(env, zoomLevel)
+      import scala.collection.JavaConversions._
       for (tile <- tiles) {
         val envelopeAsPolygon = tile.getEnvelopeAsPolygon
         val tileIntersects = OperatorIntersects.local().execute(envelopeAsPolygon, geometry, spatialRef, null)
         if (tileIntersects) {
 
-          val d = 0.08333
-          val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, d, null)
           /*
            * Binary encode the tile
            */
-          val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
           tileWritable.set(TileCalculator.encodeTile(tile))
-          tileRasterizer.rasterizePolygon(outputGeom.asInstanceOf[Polygon])
-          val bits = tileRasterizer.getBitset
-          val compressedbytes = Snappy.compress(bits)
-          bitsetWritable.set(compressedbytes)
-          context.write(tileWritable, bitsetWritable)
-
+          context.write(tileWritable, intWritable)
         }
       }
     }
   }
 
   //
-  class RasterizedTileStack extends TableReducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
+  class BufferReducer extends TableReducer[ImmutableBytesWritable, IntWritable, ImmutableBytesWritable] {
 
     val outVal = new IntWritable()
     var classToPrecedenceMap: Map[Int, Int] = ConfigurationFactory.getPrecedence
+    val spatialReference = SpatialReference.create(4326)
 
-    override def reduce(key: ImmutableBytesWritable, values: Iterable[ImmutableBytesWritable],
-                        context: Reducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, Mutation]#Context): Unit = {
+    override def reduce(key: ImmutableBytesWritable, values: Iterable[IntWritable],
+                        context: Reducer[ImmutableBytesWritable, IntWritable, ImmutableBytesWritable, Mutation]#Context): Unit = {
 
+      //TODO: process /user/tempehu/osm/highways
+      //TODO: /user/tempehu/osm/highways
+      //TODO: translate unit tests
 
-      val bitsetCompositor = new BitsetCompositor(256 * 256)
-
-      /*
-      Iterate all geometries,
-       */
-      for (value <- values) {
-
-        val bytes = value.get()
-        val v = Snappy.uncompress(bytes)
-        bitsetCompositor.or(v)
-      }
-
-      val image = BinaryImage.getImage(bitsetCompositor.getBitset, 256, 256)
-
+//      val tile = TileCalculator.decodeTile(key.get())
+//      val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
+//
+//      /*
+//      Iterate all geometries,
+//       */
+//      for (value <- values) {
+//        val geometry: Geometry = OperatorImportFromWkt.local.execute(0, Geometry.Type.Polyline, value.toString, null)
+//        val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, 0.08333, null)
+//        tileRasterizer.rasterizePolygon(outputGeom.asInstanceOf[Polygon])
+//      }
+//
+//      val image: Array[Byte] = tileRasterizer.getImage
+////      val put = createTileImagePut(key, image)
+//
+      val count = values.map(_.get()).sum
       val put = new Put(key.get())
-      put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
+      put.addColumn(TileDataAcess.cf, TileDataAcess.roadCount, Bytes.toBytes(count))
       context.write(key, put)
-
-//      writeDebugTile(tile, image)
-
-    }
-
-    @throws[IOException]
-    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
-      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
-      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
-      for (aByte <- bytes) {
-        fileOutputStream.write(aByte)
-      }
+//
+////      writeDebugTile(tile, image)
+//
+//    }
+//
+//    @throws[IOException]
+//    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
+//      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
+//      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
+//      for (aByte <- bytes) {
+//        fileOutputStream.write(aByte)
+//      }
     }
 
   }

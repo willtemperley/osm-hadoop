@@ -61,12 +61,6 @@
             <artifactId>esri-geometry-api</artifactId>
             <version>1.2.1</version>
         </dependency>
-        <!-- spark hbase -->
-        <!--<dependency>-->
-            <!--<groupId>HBase-Spark</groupId>-->
-            <!--<artifactId>hbase-spark-connector</artifactId>-->
-            <!--<version>1.0.0</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
@@ -77,12 +71,6 @@
             <artifactId>hbase-server</artifactId>
             <version>1.2.1</version>
         </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>org.openstreetmap.osmosis</groupId>-->
-            <!--<artifactId>osmosis-hbase</artifactId>-->
-            <!--<version>0.44.2</version>-->
-        <!--</dependency>-->
 
         <!-- Geotools-->
         <dependency>
@@ -136,12 +124,6 @@
             <groupId>org.openstreetmap.osmosis</groupId>
             <artifactId>osmosis-core</artifactId>
             <version>0.44.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>1.13</version>
         </dependency>
 
         <!-- Testing -->
