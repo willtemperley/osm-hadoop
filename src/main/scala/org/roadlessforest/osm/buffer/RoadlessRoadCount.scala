@@ -187,7 +187,7 @@ object RoadlessRoadCount extends Configured with Tool {
 //      val image: Array[Byte] = tileRasterizer.getImage
 ////      val put = createTileImagePut(key, image)
 //
-      val count = values.map(_.get()).sum
+      val count = values.size
       val put = new Put(key.get())
       put.addColumn(TileDataAcess.cf, TileDataAcess.roadCount, Bytes.toBytes(count))
       context.write(key, put)
