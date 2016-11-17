@@ -29,7 +29,8 @@ object ExtractRaster {
 
     val conf = new SparkConf().setAppName("raster_extract")
 
-    val bigImage: BufferedImage = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_BYTE_GRAY)
+//    val bigImage: BufferedImage = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_BYTE_GRAY)
+    val bigImage: BufferedImage = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_INT_ARGB)
 
     val bigRas = bigImage.getRaster
 
