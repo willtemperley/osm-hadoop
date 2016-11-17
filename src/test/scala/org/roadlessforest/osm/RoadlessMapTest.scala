@@ -3,7 +3,7 @@ package org.roadlessforest.osm
 import java.io.{File, FileInputStream}
 import java.nio.ByteBuffer
 
-import com.esri.core.geometry.examples.ShapefileGeometryCursor
+//import com.esri.core.geometry.examples.ShapefileGeometryCursor
 import com.esri.core.geometry.{Geometry, OperatorExportToWkb, OperatorExportToWkt}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.KeyValue
@@ -41,28 +41,28 @@ class RoadlessMapTest {
 
   def go(mapReduceDriver: MapReduceDriver[LongWritable,WayWritable, _, _, _, _]): Unit = {
 
-    setupSerialization(mapReduceDriver)
-
-    val fileInputStream = new FileInputStream(new File("src/test/resources/shp/canary.shp"))
-    val shapeFileReader = new ShapefileGeometryCursor(fileInputStream)
-
-    //        OperatorImportFromWkb local = OperatorImportFromWkb.local();
-
-    while (shapeFileReader.hasNext) {
-
-      val next = shapeFileReader.next
-
-      key.set(shapeFileReader.getGeometryID)
-      val wkt: String = OperatorExportToWkt.local().execute(0, next, null)
-
-      val x = new WayWritable
-      x.put("geometry", wkt)
-      x.put("highway", "anything")
-
-      mapReduceDriver.withInput(key, x)
-
-    }
-    mapReduceDriver.run
+//    setupSerialization(mapReduceDriver)
+//
+//    val fileInputStream = new FileInputStream(new File("src/test/resources/shp/canary.shp"))
+//    val shapeFileReader = new ShapefileGeometryCursor(fileInputStream)
+//
+//    //        OperatorImportFromWkb local = OperatorImportFromWkb.local();
+//
+//    while (shapeFileReader.hasNext) {
+//
+//      val next = shapeFileReader.next
+//
+//      key.set(shapeFileReader.getGeometryID)
+//      val wkt: String = OperatorExportToWkt.local().execute(0, next, null)
+//
+//      val x = new WayWritable
+//      x.put("geometry", wkt)
+//      x.put("highway", "anything")
+//
+//      mapReduceDriver.withInput(key, x)
+//
+//    }
+//    mapReduceDriver.run
 
   }
 

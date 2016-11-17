@@ -1,4 +1,4 @@
-package org.roadlessforest.osm
+package org.roadlessforest.osm.buffer
 
 import java.awt.image.BufferedImage
 import java.io.File
@@ -19,16 +19,16 @@ import org.roadlessforest.osm.grid.{GlobalGrid, CoordinateWritable}
 /**
   * Created by willtemperley@gmail.com on 04-Mar-16.
   */
-object ExtractRaster {
+object ExtractRaster2 {
 
-  val width = 65536
-  val grid = new GlobalGrid(width, width / 2)
+  val grid = new GlobalGrid(, 21600)
 
   def main(args: Array[String]) {
 
     val conf = new SparkConf().setAppName("raster_extract")
 
     val bigImage: BufferedImage = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_BYTE_GRAY)
+
     val bigRas = bigImage.getRaster
 
     if (conf.get("spark.master", "").isEmpty) {
