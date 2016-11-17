@@ -89,7 +89,7 @@ object RoadlessRoadCount extends Configured with Tool {
 
     //the field on which to base the raster value
     val geometryKey = new Text("geometry")
-    var zoomLevel = 20
+    var zoomLevel = 16
 
     val wkt = new WKTReader
 
