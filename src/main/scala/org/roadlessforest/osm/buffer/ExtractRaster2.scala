@@ -21,7 +21,11 @@ import org.roadlessforest.osm.grid.{GlobalGrid, CoordinateWritable}
   */
 object ExtractRaster2 {
 
-  val grid = new GlobalGrid(, 21600)
+  /*
+  Corresponds to tiles at level 14
+   */
+  val width = 32768
+  val grid = new GlobalGrid(width, width / 2)
 
   def main(args: Array[String]) {
 

@@ -28,7 +28,7 @@ object WayRasterizer2 extends Configured with Tool {
 //  val width: Int = 43200
 //  val height: Int = 21600
 
-  val width = 32768 / 2
+  val width = 32768
   val height = width / 2
 
   val valueKey = "valueKey"
