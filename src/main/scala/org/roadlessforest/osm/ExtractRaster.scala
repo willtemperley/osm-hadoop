@@ -21,7 +21,9 @@ import org.roadlessforest.osm.grid.{GlobalGrid, CoordinateWritable}
   */
 object ExtractRaster {
 
-  val grid = new GlobalGrid(43200, 21600)
+//  val grid = new GlobalGrid(43200, 21600)
+  val xres = 65536
+  val grid = new GlobalGrid(xres, xres / 2)
 
   def main(args: Array[String]) {
 
