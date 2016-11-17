@@ -1,4 +1,4 @@
-package org.roadlessforest.osm
+package org.roadlessforest.osm.buffer
 
 import java.lang.Iterable
 
@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
+import org.roadlessforest.osm.WayRasterizer
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.raster.{Plotter, Rasterizer}
@@ -22,16 +23,19 @@ import scala.collection.JavaConversions._
 /*
 *
 */
-object WayRasterizer extends Configured with Tool {
+object WayRasterizer2 extends Configured with Tool {
 
-  val width: Int = 43200
-  val height: Int = 21600
+//  val width: Int = 43200
+//  val height: Int = 21600
+
+  val width = 65536
+  val height = width / 2
 
   val valueKey = "valueKey"
 
   def main(args: Array[String]) {
 
-    val res = ToolRunner.run(new Configuration(), WayRasterizer, args)
+    val res = ToolRunner.run(new Configuration(), WayRasterizer2, args)
     System.exit(res)
   }
 
@@ -197,15 +201,15 @@ object WayRasterizer extends Configured with Tool {
                         context: Reducer[CoordinateWritable, IntWritable, CoordinateWritable, IntWritable]#Context): Unit = {
 
       //Need to find the pixel with the lowest value
-      val pixelValues = values.map(_.get())
+//      val pixelValues = values.map(_.get())
 
       //Join
 //      val pixelsToPrecedence = pixelValues.zip(pixelValues.map(classToPrecedenceMap))
-      val precedenceToPixels = pixelValues.map(classToPrecedenceMap).zip(pixelValues)
+//      val precedenceToPixels = pixelValues.map(classToPrecedenceMap).zip(pixelValues)
 
 //      val pixelValue = values.map(_.get()).map(classToPrecedenceMap).min
-      val min: (Int, Int) = precedenceToPixels.min
-      val x = min._2
+//      val min: (Int, Int) = precedenceToPixels.min
+      val x = values.size
 
       outVal.set(x)
       context.write(key, outVal)
