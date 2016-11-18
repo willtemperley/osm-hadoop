@@ -31,7 +31,7 @@ object ExtractRaster2 {
 
     val conf = new SparkConf().setAppName("raster_extract")
 
-    val bigImage: BufferedImage = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_INT_ARGB)
+    val bigImage: BufferedImage = new BufferedImage(grid.w, grid.h, BufferedImage.TYPE_USHORT_GRAY)
 
     val bigRas = bigImage.getRaster
 
@@ -52,11 +52,14 @@ object ExtractRaster2 {
       .map(g => (g._1._1, yIdx(g._1._2), g._2))
       .collect()
 
+    val outArray = new Array[Short](1)
+
     for ((x,y,z) <- pixelsC) {
 
       if (x >= 0 && x < grid.w && y >= 0 && y < grid.h) {
 
-        bigRas.setPixel(x, y, Array(z))
+        outArray(0) = z.asInstanceOf[Short]
+        bigRas.setDataElements(x, y, outArray)
 
       } else println(x, y, z)
 
@@ -80,7 +83,6 @@ object ExtractRaster2 {
     val params: ParameterValueGroup = format.getWriteParameters
     params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName.toString).setValue(wp)
     val x = params.values()
-
 
     val bbox = new Envelope2D(DefaultGeographicCRS.WGS84, -180, -90, 360, 180)
     val coverage = new GridCoverageFactory().create("tif", bigImage, bbox)
