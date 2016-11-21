@@ -20,6 +20,7 @@ import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.writable.WayWritable
 import xyz.TileCalculator
+import xyz.TileCalculator.Tile
 
 import scala.collection.JavaConversions._
 
@@ -152,7 +153,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
           /*
            * Binary encode the tile
            */
-          tileWritable.set(TileCalculator.encodeTile(tile))
+          tileWritable.set(tile.encode())
           context.write(tileWritable, lineString)
         }
       }
@@ -173,7 +174,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
       //TODO: /user/tempehu/osm/highways
       //TODO: translate unit tests
 
-      val tile = TileCalculator.decodeTile(key.get())
+      val tile = new Tile(key.get())
       val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
 
       /*

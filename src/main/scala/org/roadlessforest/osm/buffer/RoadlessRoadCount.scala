@@ -151,7 +151,7 @@ object RoadlessRoadCount extends Configured with Tool {
           /*
            * Binary encode the tile
            */
-          tileWritable.set(TileCalculator.encodeTile(tile))
+          tileWritable.set(tile.encode())
           context.write(tileWritable, intWritable)
         }
       }

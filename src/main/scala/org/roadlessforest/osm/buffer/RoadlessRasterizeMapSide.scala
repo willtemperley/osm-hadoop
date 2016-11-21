@@ -121,7 +121,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
            * Binary encode the tile
            */
           val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
-          tileWritable.set(TileCalculator.encodeTile(tile))
+          tileWritable.set(tile.encode())
           tileRasterizer.rasterizePolygon(outputGeom.asInstanceOf[Polygon])
           val bits = tileRasterizer.getBitset
           val compressedbytes = Snappy.compress(bits)
