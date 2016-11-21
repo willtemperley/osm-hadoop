@@ -19,6 +19,7 @@ import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.roadlessforest.osm.WayBuilder.WayMapper
 import org.roadlessforest.osm.writable.{OsmEntityWritable, ReferencedWayNodeWritable, WayWritable}
+import xyz.TileCalculator.Tile
 
 import scala.collection.JavaConversions._
 
@@ -76,9 +77,7 @@ object TileLoader extends Configured with Tool {
                      context: Mapper[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, Cell]#Context): Unit = {
 
       val bytes = key.get()
-      ArrayUtils.reverse(bytes)
-
-      val keyValue = new KeyValue(bytes, "d".getBytes, "i".getBytes, value.get())
+      val keyValue = new KeyValue(bytes, Tile.cf, Tile.cimg, value.get())
       context.write(key, keyValue)
     }
 
