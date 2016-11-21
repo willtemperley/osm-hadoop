@@ -86,14 +86,14 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
     val wkt = new WKTReader
 
-//    val grid = new GlobalGrid(width, height)
+    //    val grid = new GlobalGrid(width, height)
 
     val rasterValueKey = new Text()
 
     val tileWritable = new ImmutableBytesWritable
     val spatialReference = SpatialReference.create(4326)
     val bitsetWritable = new ImmutableBytesWritable
-    var zoomLevel = 10
+    var zoomLevel = 14
 
     override def map(key: LongWritable, value: WayWritable,
                      context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
@@ -109,7 +109,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
-      val tiles  = TileCalculator.tilesForEnvelope(env, zoomLevel)
+      val tiles = TileCalculator.tilesForEnvelope(env, zoomLevel)
       for (tile <- tiles) {
         val envelopeAsPolygon = tile.getEnvelopeAsPolygon
         val tileIntersects = OperatorIntersects.local().execute(envelopeAsPolygon, geometry, spatialRef, null)
@@ -161,7 +161,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
       context.write(key, put)
 
-//      writeDebugTile(tile, image)
+      //      writeDebugTile(tile, image)
 
     }
 
@@ -176,10 +176,48 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
 
   }
 
-//  def createTileImage(ImmutableBytesWritable key, byte[] imgData) throws IOException {
-//    KeyValue kv = new KeyValue(key.get(), EntityDataAccess.data, imgData);
-//    put.add(kv);
-//    return put;
+  class RasterizedTileStack2 extends Reducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
+
+    var classToPrecedenceMap: Map[Int, Int] = ConfigurationFactory.getPrecedence
+
+    val value = new ImmutableBytesWritable()
+
+    override def reduce(key: ImmutableBytesWritable, values: Iterable[ImmutableBytesWritable],
+                        context: Reducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
+
+
+      val bitsetCompositor = new BitsetCompositor(256 * 256)
+
+      /*
+      Iterate all geometries,
+       */
+      for (value <- values) {
+
+        val bytes = value.get()
+        val v = Snappy.uncompress(bytes)
+        bitsetCompositor.or(v)
+      }
+
+      val image = BinaryImage.getImage(bitsetCompositor.getBitset, 256, 256)
+
+      //key passed through
+      value.set(image)
+      context.write(key, value)
+
+      //      writeDebugTile(tile, image)
+
+    }
+
+    @throws[IOException]
+    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
+      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
+      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
+      for (aByte <- bytes) {
+        fileOutputStream.write(aByte)
+      }
+    }
+
+  }
 
 }
 

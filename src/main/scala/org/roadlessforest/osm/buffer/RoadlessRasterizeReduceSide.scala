@@ -53,7 +53,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
 
     job.setJarByClass(this.getClass)
 
-    job.setMapperClass(classOf[WayMapper])
+    job.setMapperClass(classOf[TileToWayMapper])
     job.setReducerClass(classOf[BufferReducer])
 
     job.setInputFormatClass(classOf[SequenceFileInputFormat[_, _]])
@@ -75,7 +75,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
   /**
     *
     */
-  class WayMapper extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, Text] {
+  class TileToWayMapper extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, Text] {
 
     var tag: String = _
 
@@ -91,7 +91,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
 
     //the field on which to base the raster value
     val geometryKey = new Text("geometry")
-    var zoomLevel = 10
+    var zoomLevel = 14
 
     val wkt = new WKTReader
 
@@ -173,28 +173,27 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
       //TODO: /user/tempehu/osm/highways
       //TODO: translate unit tests
 
-//      val tile = TileCalculator.decodeTile(key.get())
-//      val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
-//
-//      /*
-//      Iterate all geometries,
-//       */
-//      for (value <- values) {
-//        val geometry: Geometry = OperatorImportFromWkt.local.execute(0, Geometry.Type.Polyline, value.toString, null)
-//        val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, 0.08333, null)
-//        tileRasterizer.rasterizePolygon(outputGeom.asInstanceOf[Polygon])
-//      }
-//
-//      val image: Array[Byte] = tileRasterizer.getImage
-////      val put = createTileImagePut(key, image)
-//
-//      val put = new Put(key.get())
-//      put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
-//      context.write(key, put)
-//
-////      writeDebugTile(tile, image)
-//
-//    }
+      val tile = TileCalculator.decodeTile(key.get())
+      val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
+
+      /*
+      Iterate all geometries,
+       */
+      for (value <- values) {
+        val geometry: Geometry = OperatorImportFromWkt.local.execute(0, Geometry.Type.Polyline, value.toString, null)
+        val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, 0.08333, null)
+        tileRasterizer.rasterizePolygon(outputGeom.asInstanceOf[Polygon])
+      }
+
+      val image: Array[Byte] = tileRasterizer.getImage
+//      val put = createTileImagePut(key, image)
+
+      val put = new Put(key.get())
+      put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
+      context.write(key, put)
+
+//      writeDebugTile(tile, image)
+
 //
 //    @throws[IOException]
 //    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {

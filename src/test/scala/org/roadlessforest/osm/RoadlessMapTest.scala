@@ -3,6 +3,8 @@ package org.roadlessforest.osm
 import java.io.{File, FileInputStream}
 import java.nio.ByteBuffer
 
+import com.esri.core.geometry.examples.ShapefileGeometryCursor
+
 //import com.esri.core.geometry.examples.ShapefileGeometryCursor
 import com.esri.core.geometry.{Geometry, OperatorExportToWkb, OperatorExportToWkt}
 import org.apache.hadoop.conf.Configuration
@@ -28,41 +30,41 @@ class RoadlessMapTest {
   val key = new LongWritable()
 //  val mapReduceDriver = mapSideRasterizer
 
+  @Test
+  def mapSideTest(): Unit = {
+    executeMR(mapSideRasterizer)
+  }
 
   @Test
   def reduceSideTest(): Unit = {
-    go(reduceSideRasterizer)
+    executeMR(reduceSideRasterizer)
   }
 
-  @Test
-  def mapSideTest(): Unit = {
-    go(mapSideRasterizer)
-  }
 
-  def go(mapReduceDriver: MapReduceDriver[LongWritable,WayWritable, _, _, _, _]): Unit = {
+  def executeMR(mapReduceDriver: MapReduceDriver[LongWritable,WayWritable, _, _, _, _]): Unit = {
 
-//    setupSerialization(mapReduceDriver)
-//
-//    val fileInputStream = new FileInputStream(new File("src/test/resources/shp/canary.shp"))
-//    val shapeFileReader = new ShapefileGeometryCursor(fileInputStream)
-//
-//    //        OperatorImportFromWkb local = OperatorImportFromWkb.local();
-//
-//    while (shapeFileReader.hasNext) {
-//
-//      val next = shapeFileReader.next
-//
-//      key.set(shapeFileReader.getGeometryID)
-//      val wkt: String = OperatorExportToWkt.local().execute(0, next, null)
-//
-//      val x = new WayWritable
-//      x.put("geometry", wkt)
-//      x.put("highway", "anything")
-//
-//      mapReduceDriver.withInput(key, x)
-//
-//    }
-//    mapReduceDriver.run
+    setupSerialization(mapReduceDriver)
+
+    val fileInputStream = new FileInputStream(new File("src/test/resources/shp/canary.shp"))
+    val shapeFileReader = new ShapefileGeometryCursor(fileInputStream)
+
+    //        OperatorImportFromWkb local = OperatorImportFromWkb.local();
+
+    while (shapeFileReader.hasNext) {
+
+      val next = shapeFileReader.next
+
+      key.set(shapeFileReader.getGeometryID)
+      val wkt: String = OperatorExportToWkt.local().execute(0, next, null)
+
+      val x = new WayWritable
+      x.put("geometry", wkt)
+      x.put("highway", "anything")
+
+      mapReduceDriver.withInput(key, x)
+
+    }
+    mapReduceDriver.run
 
   }
 
@@ -74,7 +76,7 @@ class RoadlessMapTest {
 
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
-    mapReduceDriver.setMapper(new RoadlessRasterizeReduceSide.WayMapper)
+    mapReduceDriver.setMapper(new RoadlessRasterizeReduceSide.TileToWayMapper)
     mapReduceDriver.setReducer(new RoadlessRasterizeReduceSide.BufferReducer)
     mapReduceDriver
   }
