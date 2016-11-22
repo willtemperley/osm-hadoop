@@ -21,6 +21,7 @@ import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.writable.WayWritable
 import org.xerial.snappy.Snappy
 import xyz.TileCalculator
+import xyz.TileCalculator.Tile
 
 import scala.collection.JavaConversions._
 
@@ -93,7 +94,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
     val tileWritable = new ImmutableBytesWritable
     val spatialReference = SpatialReference.create(4326)
     val bitsetWritable = new ImmutableBytesWritable
-    var zoomLevel = 14
+    var zoomLevel = 13
 
     override def map(key: LongWritable, value: WayWritable,
                      context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
@@ -115,7 +116,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
         val tileIntersects = OperatorIntersects.local().execute(envelopeAsPolygon, geometry, spatialRef, null)
         if (tileIntersects) {
 
-          val d = 0.08333
+          val d = 0.008333
           val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, d, null)
           /*
            * Binary encode the tile
@@ -133,7 +134,6 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
     }
   }
 
-  //
   class RasterizedTileStack extends TableReducer[ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
 
     val outVal = new IntWritable()
@@ -161,18 +161,22 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       put.addColumn(Bytes.toBytes("d"), Bytes.toBytes("i"), image)
       context.write(key, put)
 
-      //      writeDebugTile(tile, image)
+      writeDebugTile(key, image)
 
     }
 
-    @throws[IOException]
-    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
-      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
-      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
-      for (aByte <- bytes) {
-        fileOutputStream.write(aByte)
-      }
+    protected def writeDebugTile(key: ImmutableBytesWritable, bytes: Array[Byte]): Unit = {
+      //no-op, can be overridden for debug purposes
     }
+
+//    @throws[IOException]
+//    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
+//      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
+//      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
+//      for (aByte <- bytes) {
+//        fileOutputStream.write(aByte)
+//      }
+//    }
 
   }
 
@@ -204,17 +208,13 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       value.set(image)
       context.write(key, value)
 
-      //      writeDebugTile(tile, image)
+
+      writeDebugTile(key, image)
 
     }
 
-    @throws[IOException]
-    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
-      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
-      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
-      for (aByte <- bytes) {
-        fileOutputStream.write(aByte)
-      }
+    protected def writeDebugTile(key: ImmutableBytesWritable, bytes: Array[Byte]): Unit = {
+      //no-op, can be overridden for debug purposes
     }
 
   }

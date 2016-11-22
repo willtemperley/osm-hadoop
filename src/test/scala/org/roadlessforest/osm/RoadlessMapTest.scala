@@ -1,9 +1,10 @@
 package org.roadlessforest.osm
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.ByteBuffer
 
 import com.esri.core.geometry.examples.ShapefileGeometryCursor
+import xyz.TileCalculator.Tile
 
 //import com.esri.core.geometry.examples.ShapefileGeometryCursor
 import com.esri.core.geometry.{Geometry, OperatorExportToWkb, OperatorExportToWkt}
@@ -30,15 +31,20 @@ class RoadlessMapTest {
   val key = new LongWritable()
 //  val mapReduceDriver = mapSideRasterizer
 
+//    @Test
+//    def mapSideTest(): Unit = {
+//      executeMR(mapSideRasterizer2)
+//    }
+
   @Test
   def mapSideTest(): Unit = {
     executeMR(mapSideRasterizer)
   }
-
-  @Test
-  def reduceSideTest(): Unit = {
-    executeMR(reduceSideRasterizer)
-  }
+//
+//  @Test
+//  def reduceSideTest(): Unit = {
+//    executeMR(reduceSideRasterizer)
+//  }
 
 
   def executeMR(mapReduceDriver: MapReduceDriver[LongWritable,WayWritable, _, _, _, _]): Unit = {
@@ -83,6 +89,18 @@ class RoadlessMapTest {
 
   def mapSideRasterizer: MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, Mutation] = {
 
+    class TileStack extends RoadlessRasterizeMapSide.RasterizedTileStack {
+      override protected def writeDebugTile(key: ImmutableBytesWritable, bytes: Array[Byte]): Unit = {
+        val tile = new Tile(key.get)
+        println(tile)
+        val f: File = new File("e:/tmp/ras/rasterizedtilestack-" + tile.toString + ".png")
+        val fileOutputStream: FileOutputStream = new FileOutputStream(f)
+        for (aByte <- bytes) {
+          fileOutputStream.write(aByte)
+        }
+      }
+    }
+
     //eek!
     val mapReduceDriver =
     MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, Mutation]]
@@ -90,7 +108,34 @@ class RoadlessMapTest {
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
     mapReduceDriver.setMapper(new RoadlessRasterizeMapSide.WayRasterMapper)
-    mapReduceDriver.setReducer(new RoadlessRasterizeMapSide.RasterizedTileStack)
+    mapReduceDriver.setReducer(new TileStack)
+    mapReduceDriver
+  }
+
+
+  def mapSideRasterizer2: MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable] = {
+
+    class TileStack2 extends RoadlessRasterizeMapSide.RasterizedTileStack2 {
+
+      override protected def writeDebugTile(key: ImmutableBytesWritable, bytes: Array[Byte]): Unit = {
+        val tile = new Tile(key.get)
+        println(tile)
+        val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
+        val fileOutputStream: FileOutputStream = new FileOutputStream(f)
+        for (aByte <- bytes) {
+          fileOutputStream.write(aByte)
+        }
+      }
+
+    }
+
+    val mapReduceDriver =
+    MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable]]
+
+    setupSerialization(mapReduceDriver)
+    mapReduceDriver.getConfiguration.set("valueKey", "highway")
+    mapReduceDriver.setMapper(new RoadlessRasterizeMapSide.WayRasterMapper)
+    mapReduceDriver.setReducer(new TileStack2)
     mapReduceDriver
   }
 
