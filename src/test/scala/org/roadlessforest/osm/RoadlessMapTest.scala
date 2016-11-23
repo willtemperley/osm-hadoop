@@ -31,15 +31,15 @@ class RoadlessMapTest {
   val key = new LongWritable()
 //  val mapReduceDriver = mapSideRasterizer
 
-//    @Test
-//    def mapSideTest(): Unit = {
-//      executeMR(mapSideRasterizer2)
-//    }
+    @Test
+    def mapSideTest(): Unit = {
+      executeMR(mapSideRasterizer2)
+    }
 
-  @Test
-  def mapSideTest(): Unit = {
-    executeMR(mapSideRasterizer)
-  }
+//  @Test
+//  def mapSideTest(): Unit = {
+//    executeMR(mapSideRasterizer)
+//  }
 //
 //  @Test
 //  def reduceSideTest(): Unit = {

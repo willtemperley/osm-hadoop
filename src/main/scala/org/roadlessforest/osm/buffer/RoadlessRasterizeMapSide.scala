@@ -94,7 +94,8 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
     val tileWritable = new ImmutableBytesWritable
     val spatialReference = SpatialReference.create(4326)
     val bitsetWritable = new ImmutableBytesWritable
-    var zoomLevel = 13
+    val zoomLevel = 13
+    val bufferDistance = 0.008333
 
     override def map(key: LongWritable, value: WayWritable,
                      context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
@@ -105,8 +106,9 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       val lineString: Text = value.get(geometryKey).asInstanceOf[Text]
       val geometry = OperatorImportFromWkt.local().execute(0, Geometry.Type.Polyline, lineString.toString, null)
 
-      val env = new Envelope2D()
-      geometry.queryEnvelope2D(env)
+      val e1 = new Envelope2D()
+      geometry.queryEnvelope2D(e1)
+      val env = e1.getInflated(bufferDistance, bufferDistance)
 
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
@@ -116,8 +118,7 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
         val tileIntersects = OperatorIntersects.local().execute(envelopeAsPolygon, geometry, spatialRef, null)
         if (tileIntersects) {
 
-          val d = 0.008333
-          val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, d, null)
+          val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, bufferDistance, null)
           /*
            * Binary encode the tile
            */
