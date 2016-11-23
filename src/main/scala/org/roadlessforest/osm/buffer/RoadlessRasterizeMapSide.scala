@@ -106,19 +106,19 @@ object RoadlessRasterizeMapSide extends Configured with Tool {
       val lineString: Text = value.get(geometryKey).asInstanceOf[Text]
       val geometry = OperatorImportFromWkt.local().execute(0, Geometry.Type.Polyline, lineString.toString, null)
 
-      val e1 = new Envelope2D()
-      geometry.queryEnvelope2D(e1)
-      val env = e1.getInflated(bufferDistance, bufferDistance)
+      val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, bufferDistance, null)
+
+      val env = new Envelope2D()
+      outputGeom.queryEnvelope2D(env)
 
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
       val tiles = TileCalculator.tilesForEnvelope(env, zoomLevel)
       for (tile <- tiles) {
         val envelopeAsPolygon = tile.getEnvelopeAsPolygon
-        val tileIntersects = OperatorIntersects.local().execute(envelopeAsPolygon, geometry, spatialRef, null)
+        val tileIntersects = OperatorIntersects.local().execute(envelopeAsPolygon, outputGeom, spatialRef, null)
         if (tileIntersects) {
 
-          val outputGeom = OperatorBuffer.local.execute(geometry, spatialReference, bufferDistance, null)
           /*
            * Binary encode the tile
            */
