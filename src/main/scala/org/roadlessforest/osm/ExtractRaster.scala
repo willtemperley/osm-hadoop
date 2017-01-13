@@ -21,10 +21,11 @@ import org.roadlessforest.osm.grid.{GlobalGrid, CoordinateWritable}
   */
 object ExtractRaster {
 
-  val width = 65536
-  val grid = new GlobalGrid(width, width / 2)
 
   def main(args: Array[String]) {
+
+    val width = 43200
+    val grid = new GlobalGrid(width, width / 2)
 
     val conf = new SparkConf().setAppName("raster_extract")
 
@@ -70,7 +71,7 @@ object ExtractRaster {
 
     //setting compression to LZW
     wp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT)
-    wp.setCompressionType("LZW")
+    wp.setCompressionType("DEFLATE")
     wp.setCompressionQuality(1.0F)
 
     val params: ParameterValueGroup = format.getWriteParameters
