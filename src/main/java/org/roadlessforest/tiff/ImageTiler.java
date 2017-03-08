@@ -9,8 +9,11 @@ import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffFormat;
+import org.geotools.gce.geotiff.GeoTiffReader;
+import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.resources.Arguments;
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -53,18 +56,14 @@ public class ImageTiler extends ImageSeqfileWriter {
 
     private void tile(SequenceFile.Writer writer) throws IOException {
 
-        AbstractGridFormat format = GridFormatFinder.findFormat(this.getInputFile());
 
-        //working around a bug/quirk in geotiff loading via format.getReader which doesn't set this
-        //correctly
-        Hints hints = null;
-        if (format instanceof GeoTiffFormat) {
-            hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-        }
-
-        GridCoverage2DReader gridReader = format.getReader(this.getInputFile(), hints);
-        GridCoverage2D gridCoverage = gridReader.read(null);
-
+        Hints hints = new Hints();
+        hints.put(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+        hints.put(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, DefaultGeographicCRS.WGS84);
+        GeoTiffReader geoTiffReader = new GeoTiffReader(this.getInputFile(), hints);
+        System.out.println("hints = " + hints);
+        //        GridCoverage2DReader gridReader = geoTiffReader.read(null);
+        GridCoverage2D gridCoverage = geoTiffReader.read(null);
         RenderedImage renderedImage = gridCoverage.getRenderedImage();
 
         int w = renderedImage.getWidth();
@@ -125,7 +124,7 @@ public class ImageTiler extends ImageSeqfileWriter {
             GridCoverage2D tif = new GridCoverageFactory().create("tif", bufferedImage, envelope);
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            format.getWriter(outputStream).write(tif, WriteParams.get(WriteParams.PackBits));
+            new GeoTiffWriter(outputStream).write(tif, WriteParams.get(WriteParams.PackBits));
 
             byte[] bytes = outputStream.toByteArray();
 
