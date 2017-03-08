@@ -55,7 +55,7 @@ mvn dependency:copy-dependencies #get the classpath jars in one place
 ```
 
 ```
-java -cp target/osm-hadoop-0.1.jar:target/dependency/* org.roadlessforest.osm.PreprocessPbf /path/to/pbf /path/to/sequencefile
+java -cp target/osm-hadoop-0.1.jar:target/dependency/* org.roadlessforest.osm.Preprocesser /path/to/pbf /path/to/sequencefile
 ```
 
 The output path can either be an HDFS pathname or a local file path. If the latter is chosen, the file must be loaded onto the cluster as an additional step.

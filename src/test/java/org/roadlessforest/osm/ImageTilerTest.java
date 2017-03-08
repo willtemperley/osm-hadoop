@@ -1,7 +1,8 @@
-package org.roadlessforest.tiff;
+package org.roadlessforest.osm;
 
 import org.apache.hadoop.io.SequenceFile;
 import org.geotools.resources.Arguments;
+import org.roadlessforest.tiff.ImageSeqfileWriter;
 
 import java.io.File;
 import java.io.FileInputStream;
