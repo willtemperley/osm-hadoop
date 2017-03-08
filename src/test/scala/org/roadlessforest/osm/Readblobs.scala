@@ -1,6 +1,6 @@
 package org.roadlessforest.osm
 
-import java.io.File
+import java.io.{File, FileOutputStream}
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
@@ -18,16 +18,22 @@ object Readblobs extends DecodesOsm {
     val reader = new SequenceFile.Reader(new Configuration(),
       SequenceFile.Reader.file(new Path(args(0))))
 
-    val dir = new File(args(1))
-
-    val key = new LongWritable()
+    val key = new Text()
     val v = new ArrayPrimitiveWritable()
 
+    var i = 0
     while (reader.next(key, v)) {
 
-      val x = readBlob(v.get().asInstanceOf[Array[Byte]], key.toString)
+      println(key.getBytes)
+      println(v.get())
+      val bytes = v.get().asInstanceOf[Array[Byte]]
+//      val x = readBlob(bytes, key.toString)
 
-      println("n entities: " + x.size)
+      val f = new File("E:/tmp/vn11/" + i + ".tif")
+      val outputStream = new FileOutputStream(f)
+      outputStream.write(bytes)
+//      println("n entities: " + x.size)
+      i += 1
     }
 
     reader.close()

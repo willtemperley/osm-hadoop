@@ -5,7 +5,7 @@ import java.util.Properties
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.{ConnectionFactory, Scan, Table}
-import xyz.TileCalculator.Tile
+import xyz.tms.TmsTile
 
 /**
   * Created by willtemperley@gmail.com on 22-Nov-16.
@@ -17,21 +17,19 @@ object HBaseTest {
     val tab = getTable("buffer14")
 
     val scan = new Scan()
-    scan.addFamily(Tile.cf)
+    scan.addFamily(TmsTile.cf)
     val res = tab.getScanner(scan)
 
     val iterator = res.iterator()
     while (iterator.hasNext) {
 
       val res = iterator.next()
-      val v = res.getValue(Tile.cf, Tile.cimg)
+      val v = res.getValue(TmsTile.cf, TmsTile.cimg)
 
-      val t = new Tile(res.getRow)
+      val t = new TmsTile(res.getRow)
       println(t)
 
-
     }
-
   }
 
   /**

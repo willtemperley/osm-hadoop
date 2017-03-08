@@ -7,7 +7,9 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.{ArrayPrimitiveWritable, SequenceFile, Text}
 import org.openstreetmap.osmosis.osmbinary.Fileformat
 import org.openstreetmap.osmosis.osmbinary.Fileformat.BlobHeader
+
 /**
+  * Binary
   * Created by willtemperley@gmail.com on 31-May-16.
   */
 object Preprocesser {

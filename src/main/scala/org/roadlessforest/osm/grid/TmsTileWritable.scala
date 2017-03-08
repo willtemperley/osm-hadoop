@@ -1,22 +1,24 @@
 package org.roadlessforest.osm.grid
 
+import java.nio.ByteBuffer
+
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.io.{BytesWritable, LongWritable}
-import xyz.TileCalculator.Tile
+import xyz.tms.TmsTile
 
 /**
   * Disguising as a bytewritable means very little needs implementing
   *
+  *
   * Created by willtemperley@gmail.com on 29-Mar-16.
   */
-class TileWritable extends ImmutableBytesWritable {
+class TmsTileWritable extends ImmutableBytesWritable {
 
-  def set(tile: Tile): Unit = {
+
+  def set(tile: TmsTile): Unit = {
     this.set(tile.encode())
   }
 
-  def getTile: Tile = {
-    new Tile(this.get)
+  def getTile: TmsTile = {
+    new TmsTile(this.get)
   }
-
 }

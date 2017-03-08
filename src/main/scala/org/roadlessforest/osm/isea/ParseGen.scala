@@ -90,24 +90,24 @@ object ParseGen {
     val s = Source.fromFile(f)
     val lines = s.getLines()
 
-    val sw = new ShapeWriter(geomType = GeomType.Polygon)
-
-    for (elem <- lines) {
-      acceptor.add(elem)
-      if (!acceptor.fileEnd) {
-        if (acceptor.polyEnd) {
-          val isCrossing = acceptor.isCrossing
-
-          val p = acceptor.getPolygon
-          //          if (p != null) {
-//          println(p)
-          if (!isCrossing) sw.addFeature(p, Seq(acceptor.id.toString))
-          //          }
-        }
-      }
-    }
-
-    sw.write("e:/isea3h/shp/" + gridName + ".shp")
+//    val sw = new ShapeWriter(geomType = GeomType.Polygon)
+//
+//    for (elem <- lines) {
+//      acceptor.add(elem)
+//      if (!acceptor.fileEnd) {
+//        if (acceptor.polyEnd) {
+//          val isCrossing = acceptor.isCrossing
+//
+//          val p = acceptor.getPolygon
+//          //          if (p != null) {
+////          println(p)
+//          if (!isCrossing) sw.addFeature(p, Seq(acceptor.id.toString))
+//          //          }
+//        }
+//      }
+//    }
+//
+//    sw.write("e:/isea3h/shp/" + gridName + ".shp")
 
   }
 

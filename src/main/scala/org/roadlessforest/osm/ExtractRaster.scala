@@ -66,7 +66,7 @@ object ExtractRaster {
   def write(outputImgFN: String, bigImage: BufferedImage): Unit = {
 
     //getting the write parameters
-    val wp = new GeoTiffWriteParams
+    val wp: GeoTiffWriteParams = new GeoTiffWriteParams
     val format = new GeoTiffFormat
 
     //setting compression to LZW

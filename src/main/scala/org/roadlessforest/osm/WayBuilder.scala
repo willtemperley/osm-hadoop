@@ -80,7 +80,7 @@ object WayBuilder extends Configured with Tool {
     override def reduce(key: LongWritable, values: Iterable[OsmEntityWritable],
                         context: Reducer[LongWritable, OsmEntityWritable, LongWritable, WayWritable]#Context): Unit = {
 
-      val(ways, nodes) =  values.map(_.get()).partition(_.isInstanceOf[WayWritable])
+      val (ways, nodes) =  values.map(_.get()).partition(_.isInstanceOf[WayWritable])
 
       if (ways.size != 1) {
         throw new RuntimeException("Expected a single Way. Actual number found: " + ways.size)

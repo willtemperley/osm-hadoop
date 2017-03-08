@@ -19,8 +19,7 @@ import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.writable.WayWritable
-import xyz.TileCalculator
-import xyz.TileCalculator.Tile
+import xyz.tms.{TmsTile, TmsTileCalculator}
 
 import scala.collection.JavaConversions._
 
@@ -143,7 +142,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
 
       val spatialRef: SpatialReference = SpatialReference.create(4326)
 
-      val tiles  = TileCalculator.tilesForEnvelope(env, zoomLevel)
+      val tiles  = TmsTileCalculator.tilesForEnvelope(env, zoomLevel)
       import scala.collection.JavaConversions._
       for (tile <- tiles) {
         val envelopeAsPolygon = tile.getEnvelopeAsPolygon
@@ -174,7 +173,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
       //TODO: /user/tempehu/osm/highways
       //TODO: translate unit tests
 
-      val tile = new Tile(key.get())
+      val tile = new TmsTile(key.get())
       val tileRasterizer = new TileRasterizer(tile, new BinaryScanCallback(256, 256))
 
       /*
@@ -197,7 +196,7 @@ object RoadlessRasterizeReduceSide extends Configured with Tool {
 
 //
 //    @throws[IOException]
-//    private def writeDebugTile(tile: TileCalculator.Tile, bytes: Array[Byte]) {
+//    private def writeDebugTile(tile: TileCalculator.TmsTile, bytes: Array[Byte]) {
 //      val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
 //      val fileOutputStream: FileOutputStream = new FileOutputStream(f)
 //      for (aByte <- bytes) {

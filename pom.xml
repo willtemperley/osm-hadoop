@@ -14,7 +14,7 @@
     </scm>
 
     <properties>
-        <geotools.version>14.3</geotools.version>
+        <geotools.version>14.5</geotools.version>
         <spark.version>1.6.0</spark.version>
     </properties>
 
@@ -68,6 +68,7 @@
             <artifactId>esri-geometry-api</artifactId>
             <version>1.2.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>

@@ -4,7 +4,7 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.ByteBuffer
 
 import com.esri.core.geometry.examples.ShapefileGeometryCursor
-import xyz.TileCalculator.Tile
+import xyz.tms.TmsTile
 
 //import com.esri.core.geometry.examples.ShapefileGeometryCursor
 import com.esri.core.geometry.{Geometry, OperatorExportToWkb, OperatorExportToWkt}
@@ -23,28 +23,28 @@ import org.roadlessforest.osm.writable.WayWritable
 /**
   * Created by willtemperley@gmail.com on 14-Nov-16.
   */
-class RoadlessMapTest {
+class RoadlessMapTest extends MRUnitSerialization {
 
   val data = Bytes.toBytes("d")
   val geom = Bytes.toBytes("geom")
 
   val key = new LongWritable()
-//  val mapReduceDriver = mapSideRasterizer
+  //  val mapReduceDriver = mapSideRasterizer
 
-    @Test
-    def mapSideTest(): Unit = {
-      executeMR(mapSideRasterizer2)
-    }
+  @Test
+  def mapSideTest(): Unit = {
+    executeMR(mapSideRasterizer2)
+  }
 
-//  @Test
-//  def mapSideTest(): Unit = {
-//    executeMR(mapSideRasterizer)
-//  }
-//
-//  @Test
-//  def reduceSideTest(): Unit = {
-//    executeMR(reduceSideRasterizer)
-//  }
+  //  @Test
+  //  def mapSideTest(): Unit = {
+  //    executeMR(mapSideRasterizer)
+  //  }
+  //
+  //  @Test
+  //  def reduceSideTest(): Unit = {
+  //    executeMR(reduceSideRasterizer)
+  //  }
 
 
   def executeMR(mapReduceDriver: MapReduceDriver[LongWritable,WayWritable, _, _, _, _]): Unit = {
@@ -78,7 +78,7 @@ class RoadlessMapTest {
 
     //eek!
     val mapReduceDriver =
-    MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, Text, ImmutableBytesWritable, Mutation]]
+      MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, Text, ImmutableBytesWritable, Mutation]]
 
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
@@ -91,7 +91,7 @@ class RoadlessMapTest {
 
     class TileStack extends RoadlessRasterizeMapSide.RasterizedTileStack {
       override protected def writeDebugTile(key: ImmutableBytesWritable, bytes: Array[Byte]): Unit = {
-        val tile = new Tile(key.get)
+        val tile = new TmsTile(key.get)
         println(tile)
         val f: File = new File("e:/tmp/ras/rasterizedtilestack-" + tile.toString + ".png")
         val fileOutputStream: FileOutputStream = new FileOutputStream(f)
@@ -103,7 +103,7 @@ class RoadlessMapTest {
 
     //eek!
     val mapReduceDriver =
-    MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, Mutation]]
+      MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, Mutation]]
 
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
@@ -118,7 +118,7 @@ class RoadlessMapTest {
     class TileStack2 extends RoadlessRasterizeMapSide.RasterizedTileStack2 {
 
       override protected def writeDebugTile(key: ImmutableBytesWritable, bytes: Array[Byte]): Unit = {
-        val tile = new Tile(key.get)
+        val tile = new TmsTile(key.get)
         println(tile)
         val f: File = new File("e:/tmp/ras/mr-" + tile.toString + ".png")
         val fileOutputStream: FileOutputStream = new FileOutputStream(f)
@@ -130,7 +130,7 @@ class RoadlessMapTest {
     }
 
     val mapReduceDriver =
-    MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable]]
+      MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable, ImmutableBytesWritable]]
 
     setupSerialization(mapReduceDriver)
     mapReduceDriver.getConfiguration.set("valueKey", "highway")
@@ -139,11 +139,5 @@ class RoadlessMapTest {
     mapReduceDriver
   }
 
-
-  protected def setupSerialization(mapReduceDriver: MapReduceDriver[_, _, _, _, _, _]): Configuration = {
-    val configuration = mapReduceDriver.getConfiguration
-    configuration.setStrings("io.serializations", configuration.get("io.serializations"), classOf[MutationSerialization].getName, classOf[ResultSerialization].getName, classOf[KeyValueSerialization].getName)
-    configuration
-  }
 
 }
