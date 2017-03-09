@@ -54,7 +54,7 @@ public class ImageTiler extends ImageSeqfileWriter {
 
         GeoTiffReader.ImageMetadata metadata = referencedImage.getMetadata();
         int w = metadata.getWidth();
-        int h = metadata.getWidth();
+        int h = metadata.getHeight();
 
         com.esri.core.geometry.Envelope2D imgEnv = metadata.getEnvelope2D();
 
@@ -66,7 +66,7 @@ public class ImageTiler extends ImageSeqfileWriter {
 
 //        int targetTileSize = 1024;
         int targetTileSize = 1024;
-        double nTiles = Math.floor(((double) h) / targetTileSize);
+        double nTiles = Math.ceil(((double) h) / targetTileSize);
 
         int whereAreWe = 0;
 
@@ -85,16 +85,23 @@ public class ImageTiler extends ImageSeqfileWriter {
             SampleModel compatibleSampleModel = renderedImage.getSampleModel().createCompatibleSampleModel(w, tileSize);
             DataBuffer dataBuffer = compatibleSampleModel.createDataBuffer();
 
-            int tileOffsetTop = tileN * tileSize; //Tiles know about their offset from the top
+            int tileOffsetTop = tileN * targetTileSize; //Tiles know about their offset from the top in the JAI model
+            System.out.println("tileOffsetTop = " + tileOffsetTop);
 
             for (int i = 0; i < tileSize; i++) {
 
-                int tileY = (tileN * tileSize) + i; //AKA offset from top
+                int tileY = tileOffsetTop + i; //AKA offset from top
+                System.out.println("tileY = " + tileY);
 
-                Raster tile = renderedImage.getTile(0, tileY);
-                System.out.println("tileOffsetTop = " + tileOffsetTop);
+                Raster tile = null;
+                try{
+                   tile  = renderedImage.getTile(0, tileY);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("e = " + e);
+                }
                 int[] tileArr = new int[w];
-                tile.getPixels(0, tileOffsetTop + i, w, 1, tileArr);
+                int y = tileOffsetTop + i;
+                tile.getPixels(0, y, w, 1, tileArr);
                 for (int j = 0; j < tileArr.length; j++) {
                     int bufferIdx = (w * i) + j;
                     dataBuffer.setElem(bufferIdx, tileArr[j]);
