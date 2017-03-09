@@ -39,7 +39,7 @@ class ImageRegionsTest extends MRUnitSerialization {
       MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable, Text, Text]]
 
     setupSerialization(mapReduceDriver)
-    mapReduceDriver.getConfiguration.set(ImageRegions.tmplocationKey, "E:/tmp/imageregions_mr")
+//    mapReduceDriver.getConfiguration.set(ImageRegions.tmplocationKey, "E:/tmp/imageregions_mr")
     mapReduceDriver.setMapper(new ImageRegions.GeotiffMapper)
     mapReduceDriver.setReducer(new ImageRegions.TileReducer)
     mapReduceDriver
