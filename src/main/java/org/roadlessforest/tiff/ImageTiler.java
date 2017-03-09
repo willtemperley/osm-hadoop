@@ -4,19 +4,11 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.hadoop.io.SequenceFile;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
-import org.geotools.coverage.grid.io.AbstractGridFormat;
-import org.geotools.coverage.grid.io.GridCoverage2DReader;
-import org.geotools.coverage.grid.io.GridFormatFinder;
-import org.geotools.factory.Hints;
-import org.geotools.gce.geotiff.GeoTiffFormat;
-import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.gce.geotiff.GeoTiffWriter;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.resources.Arguments;
 import org.opengis.geometry.Envelope;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.image.*;
 import java.io.File;
@@ -56,25 +48,21 @@ public class ImageTiler extends ImageSeqfileWriter {
 
     private void tile(SequenceFile.Writer writer) throws IOException {
 
+        GeoTiffReader geoTiffReader = new GeoTiffReader();
+        File inputFile = this.getInputFile();
+        GeoTiffReader.ReferencedImage referencedImage = geoTiffReader.readGeotiffFromFile(inputFile);
 
-        Hints hints = new Hints();
-        hints.put(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-        hints.put(Hints.DEFAULT_COORDINATE_REFERENCE_SYSTEM, DefaultGeographicCRS.WGS84);
-        GeoTiffReader geoTiffReader = new GeoTiffReader(this.getInputFile(), hints);
-        System.out.println("hints = " + hints);
-        //        GridCoverage2DReader gridReader = geoTiffReader.read(null);
-        GridCoverage2D gridCoverage = geoTiffReader.read(null);
-        RenderedImage renderedImage = gridCoverage.getRenderedImage();
+        GeoTiffReader.ImageMetadata metadata = referencedImage.getMetadata();
+        int w = metadata.getWidth();
+        int h = metadata.getWidth();
 
-        int w = renderedImage.getWidth();
-        int h = renderedImage.getHeight();
+        com.esri.core.geometry.Envelope2D imgEnv = metadata.getEnvelope2D();
 
-        Envelope2D imgEnv = gridCoverage.getEnvelope2D();
-
-        double geographicPixHeight = (imgEnv.getMaxY() - imgEnv.getMinY()) / (double) h;
+        double geographicPixHeight = (imgEnv.ymax - imgEnv.ymin) / (double) h;
         System.out.println("geographicPixHeight = " + geographicPixHeight);
 
-        CoordinateReferenceSystem targetCRS = gridCoverage.getCoordinateReferenceSystem();
+//        CoordinateReferenceSystem targetCRS = gridCoverage.getCoordinateReferenceSystem();
+        RenderedImage renderedImage = referencedImage.getRenderedImage();
 
 //        int targetTileSize = 1024;
         int targetTileSize = 1024;
@@ -113,10 +101,10 @@ public class ImageTiler extends ImageSeqfileWriter {
             }
 
             double geographicTileHeight = tileSize * geographicPixHeight;
-            double tileTop = imgEnv.getMaxY() - (geographicTileHeight * tileN);
+            double tileTop = imgEnv.ymax - (geographicTileHeight * tileN);
             double tileBottom = tileTop - geographicTileHeight;
 
-            Envelope envelope = new ReferencedEnvelope(imgEnv.getMinX(), imgEnv.getMaxX(), tileBottom, tileTop, targetCRS);
+            Envelope envelope = new ReferencedEnvelope(imgEnv.xmin, imgEnv.xmax, tileBottom, tileTop, DefaultGeographicCRS.WGS84);
 
             WritableRaster writableRaster = WritableRaster.createWritableRaster(compatibleSampleModel, dataBuffer, null);
             BufferedImage bufferedImage = new BufferedImage(renderedImage.getColorModel(), writableRaster, true, null);

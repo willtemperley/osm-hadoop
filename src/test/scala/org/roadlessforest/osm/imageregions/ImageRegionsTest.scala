@@ -51,8 +51,9 @@ class ImageRegionsTest extends MRUnitSerialization {
 
     val tinyTiff = "data/tinytiff.seq"
 
+    val resource = getResource(tinyTiff)
     val reader = new SequenceFile.Reader(new Configuration(),
-      SequenceFile.Reader.file(new Path(getResource(tinyTiff))))
+      SequenceFile.Reader.file(new Path(resource)))
 
     val key = new Text()
     val v = new ArrayPrimitiveWritable()

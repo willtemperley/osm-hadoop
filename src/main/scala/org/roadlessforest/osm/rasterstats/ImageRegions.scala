@@ -1,28 +1,19 @@
 package org.roadlessforest.osm.rasterstats
 
-import java.awt.image.BufferedImage
-import java.io.{ByteArrayInputStream, File, FileOutputStream}
+import java.io.{File, FileOutputStream}
 import java.lang.Iterable
-import javax.imageio.ImageIO
-import javax.imageio.stream.ImageInputStream
 
 import org.apache.hadoop.conf.{Configuration, Configured}
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.hbase.client.{Mutation, Put}
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.TableReducer
-import org.apache.hadoop.io.{ArrayPrimitiveWritable, IntWritable, LongWritable, Text}
+import org.apache.hadoop.io.{ArrayPrimitiveWritable, IntWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInputFormat}
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.geotools.coverage.grid.io.GridFormatFinder
-import org.geotools.gce.geotiff.GeoTiffReader
 import org.roadlessforest.osm.grid.MercatorTileWritable
-import org.roadlessforest.osm.writable.{OsmEntityWritable, WayWritable}
-import org.roadlessforest.tiff.WriteParams
-import xyz.mercator.{GlobalMercator, MercatorTile, MercatorTileCalculator}
+import org.roadlessforest.tiff.GeoTiffReader
+import xyz.mercator.{MercatorTile, MercatorTileCalculator}
 
 import scala.collection.JavaConversions._
 
@@ -92,7 +83,6 @@ object ImageRegions extends Configured with Tool {
       tmpLoc = context.getConfiguration.get(tmplocationKey)
     }
 
-    def get(bytes: Array[Byte]): GridCoverage2D = {
 
 //      val in = new ByteArrayInputStream(bytes);
 //      BufferedImage bImageFromConvert = ImageIO.read(in);
@@ -103,16 +93,11 @@ object ImageRegions extends Configured with Tool {
 
       //fixme Why can't I read a byte array direct??
       //fixme do I really need to implement an image
-      val f = File.createTempFile("asdf", ".tif", new File(tmpLoc))
+//      val f = File.createTempFile("asdf", ".tif", new File(tmpLoc))
 
-      val outputStream = new FileOutputStream(f)
-      outputStream.write(bytes)
+//      val outputStream = new FileOutputStream(f)
+//      outputStream.write(bytes)
 
-      val gridReader = new GeoTiffReader(f, WriteParams.longitudeFirst)
-
-      val gridCoverage = gridReader.read(null)
-      gridCoverage
-    }
 
     val mercatorTileCalculator = new MercatorTileCalculator
 
@@ -121,20 +106,22 @@ object ImageRegions extends Configured with Tool {
       println("Record input key: " + key.toString)
       val bytes = value.get.asInstanceOf[Array[Byte]]
 
-      val coverage = get(bytes)
+      val gridReader = new GeoTiffReader()
+      val referencedImage = gridReader.readGeotiffBytes(bytes)
+      val imageMetadata = referencedImage.getMetadata
 
-      val env = coverage.getEnvelope2D
+      val env = imageMetadata.getEnvelope2D
 
-      val img = coverage.getRenderedImage
-      val w = img.getWidth
-      val h = img.getHeight
+      val img = referencedImage.getRenderedImage
+      val w = imageMetadata.getWidth
+      val h = imageMetadata.getHeight
       val data = img.getData()
 
-      val yTop = env.getMaxY
-      val xLeft = env.getMinX
+      val yTop = env.ymax
+      val xLeft = env.xmin
 
-      val pixelSizeX = (env.getMaxX - xLeft) / w
-      val pixelSizeY = (yTop - env.getMinY) / h
+      val pixelSizeX = imageMetadata.getPixelScaleX//(env.getMaxX - xLeft) / w
+      val pixelSizeY = imageMetadata.getPixelScaleY //(yTop - env.getMinY) / h
 
       val theTile = new MercatorTile()
 
@@ -189,8 +176,8 @@ object ImageRegions extends Configured with Tool {
         if (count > 0) {
           val outText = outTextTemplate.format(i, count)
           valOut.set(outText)
-//          println(keyText)
-//          println(outText)
+          println(keyText)
+          println(outText)
           context.write(keyOut, valOut)
         }
       }
