@@ -92,6 +92,7 @@ public class ImageTiler extends ImageSeqfileWriter {
                 int tileY = (tileN * tileSize) + i; //AKA offset from top
 
                 Raster tile = renderedImage.getTile(0, tileY);
+                System.out.println("tileOffsetTop = " + tileOffsetTop);
                 int[] tileArr = new int[w];
                 tile.getPixels(0, tileOffsetTop + i, w, 1, tileArr);
                 for (int j = 0; j < tileArr.length; j++) {
