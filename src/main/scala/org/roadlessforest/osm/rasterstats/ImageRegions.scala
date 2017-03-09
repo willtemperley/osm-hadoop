@@ -28,22 +28,22 @@ object ImageRegions extends Configured with Tool {
     System.exit(res)
   }
 
-  val tmplocationKey = "tmpLocationKey"
+//  val tmplocationKey = "tmpLocationKey"
 
   override def run(args: Array[String]): Int = {
 
-    if (args.length != 3) {
-      println("Usage: WayBuilder input-seqfile-path output-seqfile-path tmpfile-location")
+    if (args.length != 2) {
+      println("Usage: ImageRegions input-seqfile-path output-seqfile-path")
       return 1
     }
-    val tmpLocation = args(3)
+//    val tmpLocation = args(3)
 
     val conf = getConf
     /**
       * Very irritatingly Geotools won't read byte arrays directly.
       * So we need to save it to a path.
       */
-    conf.set(tmplocationKey, tmpLocation)
+//    conf.set(tmplocationKey, tmpLocation)
 
     val job = Job.getInstance(conf)
 
@@ -77,11 +77,11 @@ object ImageRegions extends Configured with Tool {
 
     val tileWritable = new MercatorTileWritable
     val intWritable = new IntWritable
-    var tmpLoc = "/tmp/"
+//    var tmpLoc = "/tmp/"
 
-    override def setup(context: Mapper[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable]#Context): Unit = {
-      tmpLoc = context.getConfiguration.get(tmplocationKey)
-    }
+//    override def setup(context: Mapper[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable]#Context): Unit = {
+//      tmpLoc = context.getConfiguration.get(tmplocationKey)
+//    }
 
 
 //      val in = new ByteArrayInputStream(bytes);
