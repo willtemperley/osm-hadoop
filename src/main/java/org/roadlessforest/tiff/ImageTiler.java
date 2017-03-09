@@ -66,7 +66,7 @@ public class ImageTiler extends ImageSeqfileWriter {
 
 //        int targetTileSize = 1024;
         int targetTileSize = 1024;
-        double nTiles = Math.ceil(((double) h) / targetTileSize);
+        double nTiles = Math.floor(((double) h) / targetTileSize);
 
         int whereAreWe = 0;
 
