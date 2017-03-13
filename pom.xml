@@ -179,12 +179,25 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+
                             <filters>
+                                <filter>
+                                    <artifact>junit:junit</artifact>
+                                    <includes>
+                                        <include>junit/framework/**</include>
+                                        <include>org/junit/**</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>org/junit/experimental/**</exclude>
+                                        <exclude>org/junit/runners/**</exclude>
+                                    </excludes>
+                                </filter>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
                                 </filter>

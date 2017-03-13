@@ -1,22 +1,20 @@
 package org.roadlessforest.osm.imageregions
 
-import java.io.{File, FileOutputStream}
-
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.{ArrayPrimitiveWritable, IntWritable, SequenceFile}
+import org.apache.hadoop.io.{IntWritable, SequenceFile}
 import org.roadlessforest.osm.MRUnitSerialization
 import org.roadlessforest.osm.grid.MercatorTileWritable
 import org.roadlessforest.osm.rasterstats.ImageRegions
+import org.roadlessforest.xyz.{ImageTileWritable, TileKeyWritable}
+import xyz.mercator.MercatorTile
+
+import scala.collection.JavaConversions._
 
 //import com.esri.core.geometry.examples.ShapefileGeometryCursor
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.Mutation
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.io.{LongWritable, Text}
+import org.apache.hadoop.io.Text
 import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver
 import org.junit.Test
-import org.roadlessforest.osm.buffer.RoadlessRasterizeMapSide
-import org.roadlessforest.osm.writable.WayWritable
 
 /**
   * Created by willtemperley@gmail.com on 14-Nov-16.
@@ -32,11 +30,11 @@ class ImageRegionsTest extends MRUnitSerialization {
 
   }
 
-  def tileMR: MapReduceDriver[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable, Text, Text] = {
+  def tileMR: MapReduceDriver[TileKeyWritable, ImageTileWritable, MercatorTileWritable, IntWritable, MercatorTileWritable, Text] = {
 
     //eek!
     val mapReduceDriver =
-      MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable, Text, Text]]
+      MapReduceDriver.newMapReduceDriver.asInstanceOf[MapReduceDriver[TileKeyWritable, ImageTileWritable, MercatorTileWritable, IntWritable, MercatorTileWritable, Text]]
 
     setupSerialization(mapReduceDriver)
 //    mapReduceDriver.getConfiguration.set(ImageRegions.tmplocationKey, "E:/tmp/imageregions_mr")
@@ -45,18 +43,20 @@ class ImageRegionsTest extends MRUnitSerialization {
     mapReduceDriver
   }
 
-  def executeMR(mapReduceDriver: MapReduceDriver[Text, ArrayPrimitiveWritable, _, _, _, _]): Unit = {
+  def executeMR(mapReduceDriver: MapReduceDriver[TileKeyWritable, ImageTileWritable, MercatorTileWritable, IntWritable, MercatorTileWritable, Text]): Unit = {
 
     setupSerialization(mapReduceDriver)
 
-    val tinyTiff = "data/tinytiff.seq"
+    val littleTiff = "data/littletiff.seq"
 
-    val resource = getResource(tinyTiff)
+    val resource = getResource(littleTiff)
     val reader = new SequenceFile.Reader(new Configuration(),
       SequenceFile.Reader.file(new Path(resource)))
+//    val reader = new SequenceFile.Reader(new Configuration(),
+//      SequenceFile.Reader.file(new Path(new File("E:/tmp/vn11/xyz.seq").getPath)))
 
-    val key = new Text()
-    val v = new ArrayPrimitiveWritable()
+    val key = new TileKeyWritable()
+    val v = new ImageTileWritable()
 
     while (reader.next(key, v)) {
       mapReduceDriver.withInput(key, v)
@@ -66,7 +66,21 @@ class ImageRegionsTest extends MRUnitSerialization {
 
     println("Data read, starting MR")
 
-    mapReduceDriver.run
+    val x = mapReduceDriver.run
+
+    val mercTile = new MercatorTile
+    for (t <- x) {
+
+      val k = t.getFirst
+      val v = t.getSecond
+
+      k.getTile(mercTile)
+
+      mercTile.x
+
+    }
+
+
   }
 
 }

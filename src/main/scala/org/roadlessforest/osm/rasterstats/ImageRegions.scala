@@ -13,7 +13,9 @@ import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.roadlessforest.osm.grid.MercatorTileWritable
 import org.roadlessforest.tiff.GeoTiffReader
+import org.roadlessforest.xyz.{ImageTileWritable, TileKeyWritable}
 import xyz.mercator.{MercatorTile, MercatorTileCalculator}
+import xyz.wgs84.TileKey
 
 import scala.collection.JavaConversions._
 
@@ -73,63 +75,40 @@ object ImageRegions extends Configured with Tool {
   /**
     * Identity mapper
     */
-  class GeotiffMapper extends Mapper[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable] {
+  class GeotiffMapper extends Mapper[TileKeyWritable, ImageTileWritable, MercatorTileWritable, IntWritable] {
 
     val tileWritable = new MercatorTileWritable
     val intWritable = new IntWritable
-//    var tmpLoc = "/tmp/"
-
-//    override def setup(context: Mapper[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable]#Context): Unit = {
-//      tmpLoc = context.getConfiguration.get(tmplocationKey)
-//    }
-
-
-//      val in = new ByteArrayInputStream(bytes);
-//      BufferedImage bImageFromConvert = ImageIO.read(in);
-
-//      val bais = new ByteArrayInputStream(bytes);
-//
-//      val iis = ImageIO.createImageInputStream(bais);
-
-      //fixme Why can't I read a byte array direct??
-      //fixme do I really need to implement an image
-//      val f = File.createTempFile("asdf", ".tif", new File(tmpLoc))
-
-//      val outputStream = new FileOutputStream(f)
-//      outputStream.write(bytes)
-
 
     val mercatorTileCalculator = new MercatorTileCalculator
 
-    override def map(key: Text, value: ArrayPrimitiveWritable, context: Mapper[Text, ArrayPrimitiveWritable, MercatorTileWritable, IntWritable]#Context): Unit = {
+    override def map(key: TileKeyWritable, value: ImageTileWritable, context: Mapper[TileKeyWritable, ImageTileWritable, MercatorTileWritable, IntWritable]#Context): Unit = {
 
       println("Record input key: " + key.toString)
       val bytes = value.get.asInstanceOf[Array[Byte]]
 
-      val gridReader = new GeoTiffReader()
-      val referencedImage = gridReader.readGeotiffBytes(bytes)
-      val imageMetadata = referencedImage.getMetadata
+      val tileKey = new TileKey
+      key.readTile(tileKey)
 
-      val env = imageMetadata.getEnvelope2D
+      val imgData = value.getImage
+      val w = tileKey.getWidth
+      val h = tileKey.getHeight
 
-      val img = referencedImage.getRenderedImage
-      val w = imageMetadata.getWidth
-      val h = imageMetadata.getHeight
-      val data = img.getData()
-
+      val env = tileKey.getEnvelope2D
       val yTop = env.ymax
       val xLeft = env.xmin
 
-      val pixelSizeX = imageMetadata.getPixelScaleX//(env.getMaxX - xLeft) / w
-      val pixelSizeY = imageMetadata.getPixelScaleY //(yTop - env.getMinY) / h
+      val pixelSizeX = tileKey.getPixelScaleX//(env.getMaxX - xLeft) / w
+      val pixelSizeY = tileKey.getPixelScaleY //(yTop - env.getMinY) / h
 
       val theTile = new MercatorTile()
 
       var y = yTop
+      var offsetLeft = 0
       for (i <- 0 until h) {
 
-        val arr = new Array[Int](w)
-        data.getPixels(0, i, w, 1, arr)
+//        data.getPixels(0, i, w, 1, arr)
+        val arr = imgData.slice(offsetLeft, offsetLeft + w)
         var x = xLeft
 
         for (pixVal <- arr) {
@@ -143,22 +122,22 @@ object ImageRegions extends Configured with Tool {
         }
 
         y -= pixelSizeY
+        offsetLeft += w
       }
     }
   }
 
-  class TileReducer extends Reducer[MercatorTileWritable, IntWritable, Text, Text] {
+  class TileReducer extends Reducer[MercatorTileWritable, IntWritable, MercatorTileWritable, Text] {
 
     val nBins = 110
 
-    val keyOut = new Text()
+    val keyOut = new MercatorTileWritable()
     val valOut = new Text()
 
     override def reduce(key: MercatorTileWritable, values: Iterable[IntWritable],
-                        context: Reducer[MercatorTileWritable, IntWritable, Text, Text]#Context): Unit = {
+                        context: Reducer[MercatorTileWritable, IntWritable, MercatorTileWritable, Text]#Context): Unit = {
 
       val intCounter: Array[Int] = new Array[Int](nBins)
-
 
       val tile = new MercatorTile()
       key.getTile(tile)
@@ -167,8 +146,8 @@ object ImageRegions extends Configured with Tool {
         intCounter(x.get()) += 1
       }
 
-      val keyText = tile.toString //Key out
-      keyOut.set(keyText)
+//      val keyText = tile.toString //Key out
+//      keyOut.set(keyText)
       val outTextTemplate = "%s:%s"
 
       for (i <- intCounter.indices) {
@@ -176,9 +155,9 @@ object ImageRegions extends Configured with Tool {
         if (count > 0) {
           val outText = outTextTemplate.format(i, count)
           valOut.set(outText)
-          println(keyText)
-          println(outText)
-          context.write(keyOut, valOut)
+//          println(keyText)
+//          println(outText)
+          context.write(key, valOut)
         }
       }
 

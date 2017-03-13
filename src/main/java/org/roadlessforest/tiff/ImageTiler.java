@@ -9,6 +9,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.resources.Arguments;
 import org.opengis.geometry.Envelope;
+import org.roadlessforest.xyz.ImageTileWritable;
 
 import java.awt.image.*;
 import java.io.File;
@@ -44,6 +45,88 @@ public class ImageTiler extends ImageSeqfileWriter {
 
     private static void printUsage() {
         System.out.println("Usage: -f inputFile -o outputDirectory [-tw tileWidth<default:256> ");
+    }
+
+    private void tile2(SequenceFile.Writer writer) throws IOException {
+
+        GeoTiffReader geoTiffReader = new GeoTiffReader();
+        File inputFile = this.getInputFile();
+        GeoTiffReader.ReferencedImage referencedImage = geoTiffReader.readGeotiffFromFile(inputFile);
+
+        GeoTiffReader.ImageMetadata metadata = referencedImage.getMetadata();
+        int w = metadata.getWidth();
+        int h = metadata.getHeight();
+
+        com.esri.core.geometry.Envelope2D imgEnv = metadata.getEnvelope2D();
+
+        double geographicPixHeight = (imgEnv.ymax - imgEnv.ymin) / (double) h;
+        System.out.println("geographicPixHeight = " + geographicPixHeight);
+
+//        CoordinateReferenceSystem targetCRS = gridCoverage.getCoordinateReferenceSystem();
+        RenderedImage renderedImage = referencedImage.getRenderedImage();
+
+//        int targetTileSize = 1024;
+        int targetTileSize = 1024;
+        double nTiles = Math.ceil(((double) h) / targetTileSize);
+
+        int whereAreWe = 0;
+
+        ImageTileWritable imageTileWritable = new ImageTileWritable();
+
+        for (int tileN = 0; tileN < nTiles; tileN++) {
+
+            /*
+            TmsTile size will be the target size unless we've reached the bottom of the image
+             */
+            int tileHeight = targetTileSize;
+            if (whereAreWe + tileHeight > h) {
+                tileHeight = h - whereAreWe;
+            }
+
+            whereAreWe += tileHeight;
+
+            int[] IMAGE = new int[w * tileHeight];
+
+//            SampleModel compatibleSampleModel = renderedImage.getSampleModel().createCompatibleSampleModel(w, tileHeight);
+//            DataBuffer dataBuffer = compatibleSampleModel.createDataBuffer();
+
+            int tileOffsetTop = tileN * targetTileSize; //Tiles know about their offset from the top in the JAI model
+            System.out.println("tileOffsetTop = " + tileOffsetTop);
+
+            for (int i = 0; i < tileHeight; i++) {
+
+                int tileY = tileOffsetTop + i; //AKA offset from top
+                System.out.println("tileY = " + tileY);
+
+                Raster tile = renderedImage.getTile(0, tileY);
+                int[] tileArr = new int[w];
+                int y = tileOffsetTop + i;
+                tile.getPixels(0, y, w, 1, tileArr);
+
+                int bufferOffset = i * w; //row * wi
+                for (int j = 0; j < tileArr.length; j++) {
+                    int k = bufferOffset + j;
+                    IMAGE[k] = tileArr[j];
+                }
+
+            }
+
+            imageTileWritable.setImage(IMAGE);
+
+            double geographicTileHeight = tileHeight * geographicPixHeight;
+            double tileTop = imgEnv.ymax - (geographicTileHeight * tileN);
+            double tileBottom = tileTop - geographicTileHeight;
+
+            Envelope envelope = new ReferencedEnvelope(imgEnv.xmin, imgEnv.xmax, tileBottom, tileTop, DefaultGeographicCRS.WGS84);
+
+
+//            append(writer, tileN, bytes);
+        }
+
+        writer.close();
+    }
+
+    private void writable() {
     }
 
     private void tile(SequenceFile.Writer writer) throws IOException {
