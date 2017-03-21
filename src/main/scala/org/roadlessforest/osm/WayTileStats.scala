@@ -10,12 +10,10 @@ import org.apache.hadoop.hbase.mapreduce.{TableMapReduceUtil, TableReducer}
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.io._
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInputFormat}
-import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.openstreetmap.osmosis.hbase.mr.analysis.TileStatsSerDe
 import org.openstreetmap.osmosis.hbase.xyz.WebTileWritable
-import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.writable.WayWritable
 import xyz.GeometryUtils
@@ -62,15 +60,14 @@ object WayTileStats extends Configured with Tool {
     job.setMapOutputKeyClass(classOf[CoordinateWritable])
     job.setMapOutputValueClass(classOf[IntWritable])
 
-//    job.setOutputKeyClass(classOf[CoordinateWritable])
-//    job.setOutputValueClass(classOf[IntWritable])
+    //    job.setOutputKeyClass(classOf[CoordinateWritable])
+    //    job.setOutputValueClass(classOf[IntWritable])
 
     FileInputFormat.addInputPath(job, new Path(args(0)))
 
     TableMapReduceUtil.initTableReducerJob(args(1), classOf[DistanceReducer], job)
-//    job.setOutputFormatClass(classOf[SequenceFileOutputFormat[_, _]])
-//    FileOutputFormat.setOutputPath(job, new Path(args(1)))
-
+    //    job.setOutputFormatClass(classOf[SequenceFileOutputFormat[_, _]])
+    //    FileOutputFormat.setOutputPath(job, new Path(args(1)))
 
 
     if (job.waitForCompletion(true)) 0 else 1
@@ -140,6 +137,7 @@ object WayTileStats extends Configured with Tool {
     val wktReader: OperatorImportFromWkt = OperatorImportFromWkt.local()
     val sr: SpatialReference = SpatialReference.create(4326)
     val tileWritable = new WebTileWritable
+    val clipOp = OperatorClip.local()
 
     val doubleWritable = new DoubleWritable()
 
@@ -149,58 +147,49 @@ object WayTileStats extends Configured with Tool {
       val tileCalculator = new MercatorTileCalculator()
 
       //The string which will be converted to a raster value
-//      val rasterValueString = value.get(rasterValueKey).asInstanceOf[Text].toString
-//
-//      //fixme hackery
-//      if (rasterValueKey.toString.equals("highway")) {
-//        pixVal.set(highwayMap(rasterValueString))
-//      } else {
-//        pixVal.set(1)
-//      }
+      //      val rasterValueString = value.get(rasterValueKey).asInstanceOf[Text].toString
+      //
+      //      //fixme hackery
+      //      if (rasterValueKey.toString.equals("highway")) {
+      //        pixVal.set(highwayMap(rasterValueString))
+      //      } else {
+      //        pixVal.set(1)
+      //      }
 
 
       val lineString: Text = value.get(geometryKey).asInstanceOf[Text]
       val string = lineString.toString
 
-      val geom = wktReader.execute(0, Geometry.Type.Polyline, string, null)
+      val polyLine = wktReader.execute(0, Geometry.Type.Polyline, string, null)
 
 
       val env = new Envelope2D()
-      geom.queryEnvelope2D(env)
+      polyLine.queryEnvelope2D(env)
       val tiles = tileCalculator.tilesForEnvelope(env, 14)
 
       for (tile <- tiles) {
 
-        val env: Envelope2D = tileCalculator.getTileEnvelope(tile)
-        val polyEnv = GeometryUtils.envToPoly(env)
-        val cursor = executeIntersect(polyEnv, geom)
-        while(cursor.hasNext) {
-          val x: Polyline = cursor.next().asInstanceOf[Polyline]
+        val x: Geometry = clipOp.execute(polyLine, env, sr, null)
 
-          tileWritable.setTile(tile)
+        tileWritable.setTile(tile)
+        val length = x.asInstanceOf[Polyline].calculateLength2D()
+        doubleWritable.set(length)
+        context.write(tileWritable, doubleWritable)
 
-          val length = GeometryUtils.length(x)
-          doubleWritable.set(length)
-          context.write(tileWritable, doubleWritable)
-
-        }
-      }
-    }
-
-    //fixme move to geometryUtils
-    def executeIntersect(poly: Geometry, intersectorGeom: Geometry): Iterator[Geometry] = {
-
-      val inGeoms = new SimpleGeometryCursor(intersectorGeom)
-      val intersector = new SimpleGeometryCursor(poly)
-
-      val ix: GeometryCursor = OperatorIntersection.local().execute(inGeoms, intersector, sr, null, 4)
-
-      Iterator.continually(ix.next).takeWhile(_ != null)
     }
   }
 
+  //fixme move to geometryUtils
+  def executeIntersect(poly: Geometry, intersectorGeom: Geometry): Iterator[Geometry] = {
 
+    val inGeoms = new SimpleGeometryCursor(intersectorGeom)
+    val intersector = new SimpleGeometryCursor(poly)
 
+    val ix: GeometryCursor = OperatorIntersection.local().execute(inGeoms, intersector, sr, null, 4)
+
+    Iterator.continually(ix.next).takeWhile(_ != null)
+  }
+}
 
 
 }
