@@ -37,16 +37,17 @@ object NodeJoiner extends Configured with Tool {
     }
 
     val conf = getConf
-    conf.set(LayerTagParameterName, args(2))
+    val layerTags = args(2)
+    conf.set(LayerTagParameterName, layerTags)
 
-    /*
-    The optional 4th param is a list of tags to keep. If not specified, we keep just the one that defines the layer.
-     */
-    if (args.length > 3) {
-      conf.set(WayTagsParameterName, args(3))
-    } else {
-      conf.set(LayerTagParameterName, args(2))
-    }
+//    /*
+//    The optional 4th param is a list of tags to keep. If not specified, we keep just the one that defines the layer.
+//     */
+//    if (args.length > 3) {
+//      conf.set(WayTagsParameterName, args(3))
+//    } else {
+//      conf.set(LayerTagParameterName, args(2))
+//    }
 
     val job: Job = Job.getInstance(conf)
 
@@ -92,7 +93,8 @@ object NodeJoiner extends Configured with Tool {
 
       val layerTag: String = context.getConfiguration.get(LayerTagParameterName)
 
-      wayFilter = EntityFilters.filterByTags(layerTag)
+      val tagNames = layerTag.split(",")
+      wayFilter = EntityFilters.filterByTags(tagNames)
 
     }
 

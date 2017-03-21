@@ -19,8 +19,8 @@ public class TileKeyWritable extends ImmutableBytesWritable {
 
         buf.putDouble(tileKey.getOriginX());
         buf.putDouble(tileKey.getOriginY());
-        buf.putDouble(tileKey.getPixelScaleX());
-        buf.putDouble(tileKey.getPixelScaleY());
+        buf.putDouble(tileKey.getPixelSizeX());
+        buf.putDouble(tileKey.getPixelSizeY());
         buf.putInt(tileKey.getWidth());
         buf.putInt(tileKey.getHeight());
         buf.putInt(tileKey.getProj());
@@ -39,7 +39,7 @@ public class TileKeyWritable extends ImmutableBytesWritable {
         ByteBuffer arr = ByteBuffer.wrap(this.get());
 
         tileKey.setOrigin(arr.getDouble(), arr.getDouble());
-        tileKey.setPixelScales(arr.getDouble(), arr.getDouble());
+        tileKey.setPixelSize(arr.getDouble(), arr.getDouble());
         tileKey.setDimensions(arr.getInt(), arr.getInt());
         tileKey.setProj(arr.getInt());
     }

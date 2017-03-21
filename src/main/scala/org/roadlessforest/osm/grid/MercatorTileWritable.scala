@@ -11,7 +11,7 @@ import xyz.mercator.MercatorTile
 class MercatorTileWritable extends ImmutableBytesWritable {
 
   def setTile(tile: MercatorTile): Unit = {
-    set(tile.x, tile.y, tile.z)
+    set(tile.getX, tile.getY, tile.getZ)
   }
 
   def set(x: Int, y: Int, z: Int): Unit = {
@@ -28,9 +28,9 @@ class MercatorTileWritable extends ImmutableBytesWritable {
 
   def getTile(tile: MercatorTile): MercatorTile = {
     val arr = ByteBuffer.wrap(this.get())
-    tile.x = arr.getInt()
-    tile.y = arr.getInt()
-    tile.z = arr.getInt()
+    tile.setX(arr.getInt())
+    tile.setY(arr.getInt())
+    tile.setZ(arr.getInt())
     tile
   }
 

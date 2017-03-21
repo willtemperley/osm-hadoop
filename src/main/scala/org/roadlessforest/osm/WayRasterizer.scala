@@ -31,7 +31,7 @@ object WayRasterizer extends Configured with Tool {
 
   def main(args: Array[String]) {
 
-    val res = ToolRunner.run(new Configuration(), WayRasterizer, args)
+    val res = ToolRunner.run(new Configuration(), WayTileStats, args)
     System.exit(res)
   }
 

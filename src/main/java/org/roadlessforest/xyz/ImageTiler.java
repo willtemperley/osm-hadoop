@@ -14,25 +14,30 @@ import xyz.wgs84.TileKey;
 /**
  * Created by willtemperley@gmail.com on 10-Mar-17.
  */
-public class ImageTiler extends ImageSeqFileWriter {
+public class ImageTiler {
 
-    protected ImageTiler(String outputDirectory) throws IOException {
-        super(outputDirectory);
-    }
+//    protected ImageTiler(String outputDirectory) throws IOException {
+//        super(outputDirectory);
+//    }
 
     public static void main(String[] args) throws Exception {
 
         //GeoTools provides utility classes to parse command line arguments
         Arguments processedArgs = new Arguments(args);
 
-        ImageTiler tiler = new ImageTiler(processedArgs.getRequiredString("-o"));
-        tiler.doTiling(processedArgs.getRequiredString("-f"));
+        ImageTiler tiler = new ImageTiler();
+
+        String inPath = processedArgs.getRequiredString("-f");
+        String outPath = processedArgs.getRequiredString("-o");
+
+        ImageSeqFileWriter writer = new ImageSeqFileWriter(outPath);
+        tiler.doTiling(inPath, writer);
     }
 
-    private void doTiling(String inputFilePath) throws IOException {
+    private void doTiling(String outputFilePath, ImageSeqFileWriter writer) throws IOException {
 
         GeoTiffReader geoTiffReader = new GeoTiffReader();
-        GeoTiffReader.ReferencedImage referencedImage = geoTiffReader.readGeotiffFromFile(new File(inputFilePath));
+        GeoTiffReader.ReferencedImage referencedImage = geoTiffReader.readGeotiffFromFile(new File(outputFilePath));
 
         GeoTiffReader.ImageMetadata metadata = referencedImage.getMetadata();
         int w = metadata.getWidth();
@@ -62,11 +67,11 @@ public class ImageTiler extends ImageSeqFileWriter {
             tileKey.setOrigin(imgEnv.xmin, imgEnv.ymax);
             tileKey.setDimensions(w, h);
             tileKey.setProj(4326);
-            tileKey.setPixelScales(geographicPixHeight, geographicPixHeight); //fixme from tiff meta??
+            tileKey.setPixelSize(geographicPixHeight, geographicPixHeight); //fixme from tiff meta??
 
-            append(tileKey, IMAGE);
+            writer.append(tileKey, IMAGE);
 
-            this.close();
+            writer.close();
             return;
         }
 
@@ -119,14 +124,14 @@ public class ImageTiler extends ImageSeqFileWriter {
             tileKey.setOrigin(imgEnv.xmin, imgEnv.ymax);
             tileKey.setDimensions(w, tileHeight);
             tileKey.setProj(4326);
-            tileKey.setPixelScales(geographicPixHeight, geographicPixHeight); //fixme from tiff meta??
+            tileKey.setPixelSize(geographicPixHeight, geographicPixHeight); //fixme from tiff meta??
 
-            append(tileKey, IMAGE);
+            writer.append(tileKey, IMAGE);
 
 //            append(writer, tileN, bytes);
         }
 
-        this.close();
+        writer.close();
     }
 
 }

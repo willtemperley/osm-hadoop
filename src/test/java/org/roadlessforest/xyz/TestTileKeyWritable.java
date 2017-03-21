@@ -16,7 +16,7 @@ public class TestTileKeyWritable {
         TileKey deKey = new TileKey();
 
         serKey.setDimensions(100, 200);
-        serKey.setPixelScales(0.1, 0.2);
+        serKey.setPixelSize(0.1, 0.2);
         serKey.setOrigin(11.1, 22.2);
         serKey.setProj(4326);
 
@@ -31,8 +31,8 @@ public class TestTileKeyWritable {
         Assert.assertEquals(serKey.getOriginX(), deKey.getOriginX(), 0.00001);
         Assert.assertEquals(serKey.getOriginY(), deKey.getOriginY(), 0.00001);
 
-        Assert.assertEquals(serKey.getPixelScaleX(), deKey.getPixelScaleX(), 0.00001);
-        Assert.assertEquals(serKey.getPixelScaleY(), deKey.getPixelScaleY(), 0.00001);
+        Assert.assertEquals(serKey.getPixelSizeX(), deKey.getPixelSizeX(), 0.00001);
+        Assert.assertEquals(serKey.getPixelSizeY(), deKey.getPixelSizeY(), 0.00001);
 
         Assert.assertEquals(serKey.getProj(), deKey.getProj());
 

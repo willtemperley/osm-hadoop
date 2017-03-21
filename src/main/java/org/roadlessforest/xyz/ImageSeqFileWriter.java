@@ -12,7 +12,7 @@ import static org.osgeo.proj4j.parser.Proj4Keyword.k;
 /**
  * Created by willtemperley@gmail.com on 10-Mar-17.
  */
-abstract class ImageSeqFileWriter {
+public class ImageSeqFileWriter implements TileWriter {
 
     protected ImageTileWritable v = new ImageTileWritable();
     protected TileKeyWritable k = new TileKeyWritable();
@@ -29,7 +29,7 @@ abstract class ImageSeqFileWriter {
             );
     }
 
-    protected void append(TileKey key, int[] image) throws IOException {
+    public void append(TileKey key, int[] image) throws IOException {
         k.setTile(key); //it doesn't matter
         v.setImage(image);
         writer.append(k, v);

@@ -84,9 +84,6 @@ object ImageRegions extends Configured with Tool {
 
     override def map(key: TileKeyWritable, value: ImageTileWritable, context: Mapper[TileKeyWritable, ImageTileWritable, MercatorTileWritable, IntWritable]#Context): Unit = {
 
-      println("Record input key: " + key.toString)
-      val bytes = value.get.asInstanceOf[Array[Byte]]
-
       val tileKey = new TileKey
       key.readTile(tileKey)
 
@@ -98,8 +95,8 @@ object ImageRegions extends Configured with Tool {
       val yTop = env.ymax
       val xLeft = env.xmin
 
-      val pixelSizeX = tileKey.getPixelScaleX//(env.getMaxX - xLeft) / w
-      val pixelSizeY = tileKey.getPixelScaleY //(yTop - env.getMinY) / h
+      val pixelSizeX = tileKey.getPixelSizeX//(env.getMaxX - xLeft) / w
+      val pixelSizeY = tileKey.getPixelSizeY //(yTop - env.getMinY) / h
 
       val theTile = new MercatorTile()
 

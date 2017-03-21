@@ -76,7 +76,6 @@ class ImageRegionsTest extends MRUnitSerialization {
 
       k.getTile(mercTile)
 
-      mercTile.x
 
     }
 
