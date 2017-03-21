@@ -14,9 +14,7 @@ import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.openstreetmap.osmosis.hbase.mr.analysis.TileStatsSerDe
 import org.openstreetmap.osmosis.hbase.xyz.WebTileWritable
-import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.writable.WayWritable
-import xyz.GeometryUtils
 import xyz.mercator.MercatorTileCalculator
 
 import scala.collection.JavaConversions._
@@ -57,8 +55,8 @@ object WayTileStats extends Configured with Tool {
 
     job.setInputFormatClass(classOf[SequenceFileInputFormat[_, _]])
 
-    job.setMapOutputKeyClass(classOf[CoordinateWritable])
-    job.setMapOutputValueClass(classOf[IntWritable])
+    job.setMapOutputKeyClass(classOf[WebTileWritable])
+    job.setMapOutputValueClass(classOf[DoubleWritable])
 
     //    job.setOutputKeyClass(classOf[CoordinateWritable])
     //    job.setOutputValueClass(classOf[IntWritable])
@@ -115,7 +113,6 @@ object WayTileStats extends Configured with Tool {
     val rasterValueKey = new Text()
 
     val pixVal = new IntWritable
-    val coord = new CoordinateWritable
 
     val highwayMap: Map[String, Int] = Map(
       "motorway" -> 1,
