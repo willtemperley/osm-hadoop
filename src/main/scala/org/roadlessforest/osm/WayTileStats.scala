@@ -164,29 +164,35 @@ object WayTileStats extends Configured with Tool {
       polyLine.queryEnvelope2D(env)
       val tiles = tileCalculator.tilesForEnvelope(env, 14)
 
+      val aoi = new Envelope2D(6.98730468750001, -0.0659179542083201, 19.577636718749982, 10.055402736564224)
+
       for (tile <- tiles) {
 
-        val x: Geometry = clipOp.execute(polyLine, env, sr, null)
+        val tileEnv = tileCalculator.getTileEnvelope(tile)
+        if (tileEnv.isIntersecting(aoi)) {
 
-        tileWritable.setTile(tile)
-        val length = x.asInstanceOf[Polyline].calculateLength2D()
-        doubleWritable.set(length)
-        context.write(tileWritable, doubleWritable)
+          val x: Geometry = clipOp.execute(polyLine, tileEnv, sr, null)
 
+          tileWritable.setTile(tile)
+          val length = x.asInstanceOf[Polyline].calculateLength2D()
+          doubleWritable.set(length)
+          context.write(tileWritable, doubleWritable)
+        }
+
+      }
+    }
+
+    //fixme move to geometryUtils
+    def executeIntersect(poly: Geometry, intersectorGeom: Geometry): Iterator[Geometry] = {
+
+      val inGeoms = new SimpleGeometryCursor(intersectorGeom)
+      val intersector = new SimpleGeometryCursor(poly)
+
+      val ix: GeometryCursor = OperatorIntersection.local().execute(inGeoms, intersector, sr, null, 4)
+
+      Iterator.continually(ix.next).takeWhile(_ != null)
     }
   }
-
-  //fixme move to geometryUtils
-  def executeIntersect(poly: Geometry, intersectorGeom: Geometry): Iterator[Geometry] = {
-
-    val inGeoms = new SimpleGeometryCursor(intersectorGeom)
-    val intersector = new SimpleGeometryCursor(poly)
-
-    val ix: GeometryCursor = OperatorIntersection.local().execute(inGeoms, intersector, sr, null, 4)
-
-    Iterator.continually(ix.next).takeWhile(_ != null)
-  }
-}
 
 
 }
