@@ -149,14 +149,14 @@ object WayTileStats extends Configured with Tool {
       val tileCalculator = new MercatorTileCalculator()
 
       //The string which will be converted to a raster value
-      val rasterValueString = value.get(rasterValueKey).asInstanceOf[Text].toString
-
-      //fixme hackery
-      if (rasterValueKey.toString.equals("highway")) {
-        pixVal.set(highwayMap(rasterValueString))
-      } else {
-        pixVal.set(1)
-      }
+//      val rasterValueString = value.get(rasterValueKey).asInstanceOf[Text].toString
+//
+//      //fixme hackery
+//      if (rasterValueKey.toString.equals("highway")) {
+//        pixVal.set(highwayMap(rasterValueString))
+//      } else {
+//        pixVal.set(1)
+//      }
 
 
       val lineString: Writable = value.get(geometryKey).asInstanceOf[Text]
@@ -183,8 +183,6 @@ object WayTileStats extends Configured with Tool {
 
         }
       }
-
-
     }
 
     //fixme move to geometryUtils
