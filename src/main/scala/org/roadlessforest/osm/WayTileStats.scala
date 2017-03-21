@@ -42,8 +42,8 @@ object WayTileStats extends Configured with Tool {
   override def run(args: Array[String]): Int = {
 
     //fixme -- add tag??
-    if (args.length != 2) {
-      println("Usage: WayTileStats input-seqfile-path table")
+    if (args.length != 3) {
+      println("Usage: WayTileStats input-seqfile-path table [FIXME]")
       return 1
     }
 
