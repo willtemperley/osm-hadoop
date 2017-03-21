@@ -159,8 +159,10 @@ object WayTileStats extends Configured with Tool {
 //      }
 
 
-      val lineString: Writable = value.get(geometryKey).asInstanceOf[Text]
-      val geom = wktReader.execute(0, Geometry.Type.Line, lineString.toString, null)
+      val lineString: Text = value.get(geometryKey).asInstanceOf[Text]
+      val string = lineString.toString
+
+      val geom = wktReader.execute(0, Geometry.Type.Polyline, string, null)
 
 
       val env = new Envelope2D()
