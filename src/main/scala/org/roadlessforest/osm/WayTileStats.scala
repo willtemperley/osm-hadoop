@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
 import org.openstreetmap.osmosis.hbase.mr.analysis.TileStatsSerDe
 import org.openstreetmap.osmosis.hbase.xyz.WebTileWritable
+import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.writable.WayWritable
 import xyz.mercator.MercatorTileCalculator
 
@@ -31,7 +32,7 @@ object WayTileStats extends Configured with Tool {
 
   def main(args: Array[String]) {
 
-    val res = ToolRunner.run(new Configuration(), WayTileStats, args)
+    val res = ToolRunner.run(ConfigurationFactory.get, WayTileStats, args)
     System.exit(res)
   }
 
