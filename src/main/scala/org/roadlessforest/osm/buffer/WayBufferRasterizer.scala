@@ -12,11 +12,6 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
-import org.roadlessforest.osm.WayTileStats$
-import org.roadlessforest.osm.config.ConfigurationFactory
-import org.roadlessforest.osm.grid._
-import org.roadlessforest.osm.raster.{Plotter, Rasterizer}
-import org.roadlessforest.osm.writable.WayWritable
 
 import scala.collection.JavaConversions._
 

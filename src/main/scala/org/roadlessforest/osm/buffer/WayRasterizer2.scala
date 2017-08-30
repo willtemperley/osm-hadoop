@@ -12,7 +12,6 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, SequenceFileInput
 import org.apache.hadoop.mapreduce.lib.output.{FileOutputFormat, SequenceFileOutputFormat}
 import org.apache.hadoop.mapreduce.{Job, Mapper, Reducer}
 import org.apache.hadoop.util.{Tool, ToolRunner}
-import org.roadlessforest.osm.WayTileStats$
 import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.raster.{Plotter, Rasterizer}
@@ -42,7 +41,7 @@ object WayRasterizer2 extends Configured with Tool {
   override def run(args: Array[String]): Int = {
 
     if (args.length != 3) {
-      println("Usage: WayRasterizer input-seqfile-path output-seqfile-path tag")
+      println("Usage: WayRasterizerAfr input-seqfile-path output-seqfile-path tag")
       return 1
     }
 

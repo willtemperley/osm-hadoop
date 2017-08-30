@@ -103,7 +103,7 @@ Reduce-side, the pixel value of interest is filtered out, according to the prefe
 These are written as (x,y),z key-value pairs where x and y are the raster indices and z is the raster value.
 
 ```
-hadoop jar target/osm-hadoop-0.1.jar org.roadlessforest.osm.WayRasterizer /your/home/osm/highways /your/home/osm/xyz
+hadoop jar target/osm-hadoop-0.1.jar org.roadlessforest.osm.WayRasterizerAfr /your/home/osm/highways /your/home/osm/xyz
 ```
 
 
@@ -113,7 +113,7 @@ This simple Spark job burns the (x,y),z key value pairs into the raster.
 The driver will be producing a large GeoTiff and may therefore require a large quantity of memory.
 
 ```
-spark-submit --class org.roadlessforest.osm.ExtractRaster --master yarn-client --driver-memory=4G target/osm-hadoop-0.1.jar /your/home/osm/xyz/ /tmp/planet.tif
+spark-submit --class org.roadlessforest.osm.ExtractRasterAfr --master yarn-client --driver-memory=4G target/osm-hadoop-0.1.jar /your/home/osm/xyz/ /tmp/planet.tif
 ```
 
 

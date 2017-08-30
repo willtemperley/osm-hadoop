@@ -52,12 +52,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.openstreetmap.osmosis</groupId>
-            <artifactId>osmosis-hbase</artifactId>
-            <version>0.44.2</version>
-            <!--<groupId>org.roadlessforest</groupId>-->
-            <!--<artifactId>tiler</artifactId>-->
-            <!--<version>0.3</version>-->
+            <groupId>org.roadlessforest</groupId>
+            <artifactId>osm-hbase</artifactId>
+            <version>0.1</version>
         </dependency>
 
         <dependency>

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Attempt at simplifying geotiff reading
+ * Attempt at simplifying geotiff reading, to allow this to be used on Hadoop
  *
  * Created by willtemperley@gmail.com on 09-Mar-17.
  */

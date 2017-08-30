@@ -2,6 +2,7 @@ package org.roadlessforest.osm
 
 import java.lang.Iterable
 
+import com.esri.core.geometry.Envelope2D
 import com.vividsolutions.jts.geom.Coordinate
 import com.vividsolutions.jts.io.WKTReader
 import org.apache.hadoop.conf.{Configuration, Configured}
@@ -16,16 +17,14 @@ import org.roadlessforest.osm.config.ConfigurationFactory
 import org.roadlessforest.osm.grid._
 import org.roadlessforest.osm.raster.{Plotter, Rasterizer}
 import org.roadlessforest.osm.writable.WayWritable
+import org.roadlessforest.tiff.GeoTiffReader.ImageMetadata
 
 import scala.collection.JavaConversions._
 
 /*
 *
 */
-object WayRasterizer extends Configured with Tool {
-
-  val width: Int = 43200
-  val height: Int = 21600
+object WayRasterizerAfr extends Configured with Tool {
 
   val valueKey = "valueKey"
 
@@ -69,23 +68,6 @@ object WayRasterizer extends Configured with Tool {
 
   }
 
-//  class WayLoader extends Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable] {
-//
-//    val geometryKey = new Text("geometry")
-//    val wktReader = new WKTReader
-//
-//    override def map(key: LongWritable, value: WayWritable,
-//                     context: Mapper[LongWritable, WayWritable, ImmutableBytesWritable, ImmutableBytesWritable]#Context): Unit = {
-//
-//      val lineString: Writable = value.get(geometryKey).asInstanceOf[Text]
-//
-//      val geom = wktReader.read(lineString.toString)
-//
-//    }
-//
-//  }
-
-
   /**
     *
     */
@@ -108,7 +90,12 @@ object WayRasterizer extends Configured with Tool {
 
     val wkt = new WKTReader
 
-    val grid = new GlobalGrid(width, height)
+
+    val pixelScales = Array(2.694933500000006E-4,2.694933500000013E-4, 0d)
+    val tiePoints = Array(0d,0d,0d, -17.87638794670013, 28.552825293196904, 0d)
+
+    val imageMeta = new ImageMetadata(pixelScales, tiePoints, null, 1000, 1000)
+    val grid = new Grid(imageMeta)
 
     val rasterValueKey = new Text()
 
@@ -139,12 +126,10 @@ object WayRasterizer extends Configured with Tool {
       val wktReader = new WKTReader
 
       val plotter = new Plotter {
-
         override def plot(x: Int, y: Int): Unit = {
           coord.set(x, y)
           context.write(coord, pixVal)
         }
-
       }
 
       //The string which will be converted to a raster value
@@ -153,8 +138,6 @@ object WayRasterizer extends Configured with Tool {
       //fixme hackery
       if (rasterValueKey.toString.equals("highway")) {
         pixVal.set(highwayMap(rasterValueString))
-      } else if (rasterValueKey.toString.equals("navigable")){
-
       } else {
         pixVal.set(1)
       }
@@ -187,11 +170,6 @@ object WayRasterizer extends Configured with Tool {
     val outVal = new IntWritable()
 
     var classToPrecedenceMap: Map[Int, Int] = ConfigurationFactory.getPrecedence
-
-//    override def setup(context: Reducer[CoordinateWritable, IntWritable, CoordinateWritable, IntWritable]#Context): Unit = {
-//
-//      cl
-//    }
 
     override def reduce(key: CoordinateWritable, values: Iterable[IntWritable],
                         context: Reducer[CoordinateWritable, IntWritable, CoordinateWritable, IntWritable]#Context): Unit = {

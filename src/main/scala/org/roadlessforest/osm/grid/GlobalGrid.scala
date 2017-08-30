@@ -7,7 +7,7 @@ import com.vividsolutions.jts.geom.Coordinate
   * Created by willtemperley@gmail.com on 28-May-15.
   *
   */
-class GlobalGrid(val w: Int, val h: Int) {
+class GlobalGrid(val w: Int, val h: Int) extends GridDef {
 
   //TODO think of a way to make this more generic, with less hard-coding
   /**
@@ -16,7 +16,7 @@ class GlobalGrid(val w: Int, val h: Int) {
     * @param coordinate the coordinate
     * @return
     */
-  def snap(coordinate: Coordinate): Coord = {
+  override def snap(coordinate: Coordinate): Coord = {
 
     val x = coordinate.getOrdinate(0)
     val y = coordinate.getOrdinate(1)
